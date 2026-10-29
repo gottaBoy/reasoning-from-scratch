@@ -1,0 +1,27 @@
+services:
+  reasoning:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+      args:
+        UV_VERSION: "0.13.6"
+        USE_PYPI_TORCH: "1"
+    image: reasoning-from-scratch:local
+    working_dir: /workspace
+    ports:
+      - "127.0.0.1:8888:8888"
+    environment:
+      HF_HOME: /workspace/.cache/huggingface
+      HUGGINGFACE_HUB_CACHE: /workspace/.cache/huggingface/hub
+      TORCH_HOME: /workspace/.cache/torch
+      MPLCONFIGDIR: /workspace/.cache/matplotlib
+      JUPYTER_CONFIG_DIR: /workspace/.cache/jupyter
+      TOKENIZERS_PARALLELISM: "false"
+    volumes:
+      - reasoning_workspace:/workspace
+    stdin_open: true
+    tty: true
+
+volumes:
+  reasoning_workspace:

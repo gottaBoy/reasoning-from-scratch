@@ -40,6 +40,9 @@ git clone --depth 1 https://github.com/rasbt/reasoning-from-scratch.git
 > **Tip:**
 > Chapter 2 provides additional tips on installing Python, managing Python packages, and setting up your coding environment.
 
+> **Docker:**
+> To run the examples without installing Python packages or writing models, datasets, logs, or checkpoints into the host checkout, see the [Docker quickstart and one-week study plan](DOCKER.md).
+
 <br>
 <br>
 
