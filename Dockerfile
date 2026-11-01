@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     UV_HTTP_TIMEOUT=1800 \
     UV_HTTP_RETRIES=10 \
     UV_CONCURRENT_DOWNLOADS=1 \
+    UV_LINK_MODE=copy \
     UV_PROJECT_ENVIRONMENT=/opt/venv \
     PATH=/opt/venv/bin:$PATH \
     PYTHONPATH=/workspace:/opt/repo
@@ -34,7 +35,8 @@ RUN python -m venv --system-site-packages "$UV_PROJECT_ENVIRONMENT"
 # Appendix F/G dependencies can be added at build time.
 ARG INSTALL_EXTRAS=0
 ARG USE_PYPI_TORCH=0
-RUN if [ "$USE_PYPI_TORCH" = "1" ]; then \
+RUN --mount=type=cache,target=/root/.cache/uv \
+    if [ "$USE_PYPI_TORCH" = "1" ]; then \
         if [ "$INSTALL_EXTRAS" = "1" ]; then \
             uv sync --no-sources --no-build-isolation --group dev --extra extra; \
         else \
@@ -44,6 +46,13 @@ RUN if [ "$USE_PYPI_TORCH" = "1" ]; then \
         uv sync --frozen --no-build-isolation --group dev --extra extra; \
     else \
         uv sync --frozen --no-build-isolation --group dev; \
+    fi
+
+ARG INSTALL_BUILD_TOOLS=0
+RUN if [ "$INSTALL_BUILD_TOOLS" = "1" ]; then \
+        apt-get update && \
+        apt-get install -y --no-install-recommends build-essential && \
+        rm -rf /var/lib/apt/lists/*; \
     fi
 
 COPY . /opt/repo

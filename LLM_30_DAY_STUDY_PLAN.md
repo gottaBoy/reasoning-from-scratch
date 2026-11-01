@@ -16,7 +16,126 @@
 建议每天投入 4～6 小时，每周学习 6 天、复盘 1 天。每一天都要有
 可运行的代码、测试或实验记录，不能只阅读资料。
 
+## 当前进度与执行起点
+
+**当前学习进度固定为 Day 5。** 详见 [进度记录](docs/LEARNING_PROGRESS.md)。
+Day 6–30 的材料自动准备不改变个人完成状态；旧的 Day 2 启动清单保留作复习。
+后续参考实现、每日 Notebook 和验证入口见 [Day 6–30 课程](docs/COURSE_DAY06_30.md)。
+**每日知识点、概念、公式、误区、面试主问/追问与掌握标准**见
+[30 天知识与面试索引](docs/KNOWLEDGE_INDEX.md)，覆盖 Day 1–30。
+五个工程方向的衔接见 [推理优化与工程实践](docs/INFERENCE_ENGINEERING_PATH.md)，
+算子编译补充见 [Triton IR](docs/TRITON_IR.md)。
+
+本节将后面的 30 天安排与当前 DGX Spark 环境对齐。Day 表示学习日，不是
+自然日期；没有通过当天验收时继续补齐，不因为日历翻页就算完成。
+
+| 内容 | 当前状态 | 对学习进度的含义 |
+| --- | --- | --- |
+| Spark 镜像、CUDA 前后向、Triton JIT | 已实测通过 | 环境准备完成，不必每天重建 |
+| Qwen3 生成和小规模推理/训练 smoke | 已实测通过 | 有可运行的参考实现，不等于已经理解模型 |
+| 普通测试（含新增课程） | 282 passed / 27 skipped | 是运行基线，不是个人掌握程度评分；历史报告另行保留 |
+| Day 1 独立复现与笔记 | 待自己验收 | 独立运行一次生成，能找到设备、Cache 和日志 |
+| Day 2–4 模型、Shape、Cache | 已讲解并准备实验 | 个人理解仍需用自测题确认 |
+| Day 5 架构、MoE、MLA | 当前主任务 | 按此位置继续学习 |
+| Day 6–30 的学习产出 | 材料自动准备，个人尚未验收 | 按每日 Notebook 和每周检查点推进 |
+
+运行证据见 [Spark 验证记录](docs/DGX_SPARK_VALIDATION.md)。
+不需要重新执行整套 smoke 才能开始学习，也不能因为 smoke 通过就跳过第二周。
+剩余 Day 6–30 的统一执行包见
+[剩余 25 天执行包](docs/REMAINING_25_DAYS.md)，学习产出入口见
+[learning/README.md](learning/README.md)。
+
+Day 1 已完成项、Day 2 的数据流/模块讲解及自测题见
+[Day 1–2 学习笔记](docs/DAY01_DAY02_NOTES.md)。其中的参考答案不是个人验收记录。
+
+### 四周如何衔接
+
+| 学习日 | 主线 | 你需要独立完成的产出 |
+| --- | --- | --- |
+| Day 1–7 | 一周建立知识地图，以 Qwen3 为入口 | 模型数据流图、Shape 表、Cache 对齐实验、机制对比笔记 |
+| Day 8–14 | 用 PyTorch 实现模型核心 | RMSNorm、RoPE、Attention、GQA、KV Cache、测试与基线 |
+| Day 15–21 | CUDA/Triton 和性能分析 | 至少 3 个正确的算子、可复现计时与瓶颈分析 |
+| Day 22–30 | 推理系统与综合项目 | vLLM 阅读记录、分页缓存/调度教学实现、项目报告 |
+
+第一周是阅读和验证现有实现，第二周才是独立重写。例如 Day 4 使用仓库模型
+验证 Cache 等价性，Day 12 再为自己的模型实现 Cache；两者不是重复任务。
+第一周对 MoE、MLA、FlashAttention、vLLM 要建立概念图，不要求当天实现生产框架。
+
+### Day 2 起步复习（历史清单）
+
+本清单的任务是 **Day 2：看懂 Qwen3 的一次前向传播**。如果还没有独立运行过，
+先用 20～30 分钟完成 Day 1 的生成命令并记录输出，然后进入 Day 2。
+
+1. 阅读 `reasoning_from_scratch/qwen3.py`，顺序为
+   `QWEN_CONFIG_06_B → Qwen3Model.forward → TransformerBlock.forward →
+   GroupedQueryAttention.forward → FeedForward.forward`。
+2. 画出 `token → embedding → 28 个 Transformer Block → final norm →
+   output projection → logits` 的数据流。
+3. 为每个模块写下输入、输出、作用和残差连接的位置，遇到不懂的算子先记问题。
+4. 对照配置写出 `n_heads=16`、`n_kv_groups=8`、`head_dim=128`、
+   `emb_dim=1024` 分别控制什么；具体 Shape 验证安排在 Day 3。
+5. 写一份 Day 2 笔记，至少包含数据流图、模块表和三个尚未解决的问题。
+
+今天不以“读完全部文件”为目标。验收是：不用照着代码，也能解释一次前向传播
+经过哪些模块，以及 logits 和最终生成 token 的区别。
+
+### 接下来五个学习日
+
+| 学习日 | 具体行动 | 当天验收 |
+| --- | --- | --- |
+| Day 3 | 对已有 Attention 打印/断点观察 `view`、`transpose`、KV head 扩展前后的形状 | 用 `B=1,T=8` 完成 Q/K/V、scores、context、logits 表，并解释 `128` 为什么不一定等于 `1024/16` |
+| Day 4 | 同一组固定输入，一次输入 8 token，对比 Cache prefill 7 token 后再输入 1 token | 比较最后位置 logits，而非采样文本；记录误差、位置偏移和每层 K/V 形状 |
+| Day 5 | 完成架构差异笔记和 MoE/MLA 数据流图 | 比较时注明具体模型版本；说清各机制改变的是哪部分数据流或资源开销 |
+| Day 6 | 阅读已跑通的 `docker/check_triton.py`，标注 program、offset、mask 和 launch grid | 能解释为何测试长度用 1003/65537，以及去掉边界 mask 的风险 |
+| Day 7 | 整理请求生命周期与分页缓存/调度概念图，完成第一周复盘 | 能把 GQA、KV Cache、FlashAttention、PagedAttention、Continuous Batching 的职责分开说明 |
+
+Day 4 先使用小配置、FP32 和固定权重建立数值参考，每次独立实验使用新的 Cache
+并重置模型的位置状态。再观察 BF16 的误差，不直接要求低精度输出逐元素完全相等。
+
+Day 5 的模型组件对比表沿用 Day 2 的草稿补齐，不要求 Day 2 一天内吃透三个模型
+家族。本仓库没有实现的模块要明确标为外部阅读项。
+
+### 每天如何安排
+
+| 时间 | 行动 |
+| --- | --- |
+| 45 分钟 | 阅读当天涉及的源码和原理，先自己推导 |
+| 90 分钟 | 完成一个小实验或实现，只改变一个关键变量 |
+| 45 分钟 | 正确性测试，保存输入、配置与结果；需要计时时另做 Benchmark |
+| 30 分钟 | 写实验笔记，解释错误和未解决的问题 |
+| 30–90 分钟 | 修复问题、复述原理或补充边界测试 |
+
+可在 Jupyter 的 `/workspace/learning/` 下按学习日保存笔记和 notebook，
+例如 `day02.md`、`day03_shapes.ipynb`、`day04_cache.ipynb`。它们保存在 Spark
+volume 内，不会自动成为宿主机 Git 改动；阶段结束时按
+[Spark 教程的备份说明](DGX_SPARK.md) 导出需要版本管理的学习产出。
+
+例如，在 Jupyter 服务容器已创建、`/workspace/learning/` 已有笔记后，可在宿主机
+仓库根目录导出：
+
+```bash
+docker compose -f docker-compose.spark.yml cp reasoning:/workspace/learning ./learning
+```
+
+导出前检查宿主机是否已有同名笔记，避免覆盖自己的旧版本；随后查看 Git diff，
+只提交源码、测试和笔记，不提交模型、缓存或训练产物。
+
+### 每周检查点
+
+- Day 7：能解释全貌并展示 Shape/Cache 实验，才开始独立实现模型模块。
+- Day 14：自己的模型通过参考对齐和 Cache 一致性测试，才进入算子优化。
+- Day 21：算子正确、有计时证据和瓶颈结论，才开始组合成推理系统。
+- Day 30：能从空环境重现项目，并区分实测功能、模拟功能与未实现功能。
+
+AI 可以帮助解释、检查推导和审查测试，但“AI 写出了代码”不能直接算作当天验收。
+先自己回答问题，再与源码和实验结果核对。
+
 ## 使用本仓库
+
+**本机有 DGX Spark 时，先执行 [DGX Spark 实战教程](DGX_SPARK.md)。**
+该教程使用 `docker-compose.spark.yml`，实际验证 CUDA 矩阵乘法、Attention
+反向传播和逐阶段 smoke，并记录 [已验证范围](docs/DGX_SPARK_VALIDATION.md)。
+下面的 CPU 命令保留作对照，不是 Spark 的首选启动方式。
 
 工作目录：
 
@@ -130,18 +249,20 @@ docker run --rm --network host \
   --prompt "What is attention in a Transformer?"
 ```
 
-GPU 环境将 `docker run` 增加 `--gpus all`，并把 `--device cpu` 改为
-`--device cuda`。模型和学习产物仍保存在 `reasoning_workspace` volume 中。
+GPU 环境必须先构建 GPU 镜像，不能只给 `:local` CPU 镜像增加 `--gpus all`。
+通用 GPU 镜像为 `reasoning-from-scratch:gpu`，Spark 镜像为
+`reasoning-from-scratch:spark`；Spark 的默认数据 volume 为
+`reasoning_spark_workspace`。构建和启动均使用对应的 Compose 配置。
 
 学习期间先使用短输入和较小的 `max_new_tokens`，不要一开始运行完整评测或
 长时间训练。
 
 ## 固定学习闭环
 
-每天按下面的顺序执行：
+每天按下面的顺序执行；第一周主要用现有实现做诊断实验，第二周起再独立重写：
 
 1. 阅读 30～60 分钟，明确当天要回答的问题。
-2. 手写最小实现，不直接复制完整框架。
+2. 第一周完成最小验证实验；第二周起手写最小实现，不直接复制完整框架。
 3. 用随机输入或仓库测试验证正确性。
 4. 用 Benchmark 记录延迟、吞吐量、显存和误差。
 5. 写下失败原因、结论和下一步。
@@ -154,6 +275,18 @@ GPU 环境将 `docker run` 增加 `--gpus all`，并把 `--device cpu` 改为
 立刻实现所有高级功能。
 
 ### Day 1：环境与 Qwen3 推理
+
+DGX Spark：
+
+```bash
+docker compose -f docker-compose.spark.yml run --rm reasoning \
+  python docker/check_environment.py --device cuda
+
+docker compose -f docker-compose.spark.yml run --rm \
+  -e HTTP_PROXY -e HTTPS_PROXY -e NO_PROXY reasoning \
+  python ch02/05_use_model/generate_simple.py \
+  --device cuda --max_new_tokens 32 --prompt "The capital of France is"
+```
 
 执行最小生成。推荐使用 Docker 命令，宿主机有兼容 `uv` 时也可以使用本地命令。
 
@@ -196,6 +329,9 @@ uv run python ch02/05_use_model/generate_simple.py \
 
 ### Day 2：Transformer 和模型架构
 
+配套讲解：[Day 1–2 学习笔记](docs/DAY01_DAY02_NOTES.md)，先分清“整体数据流”
+与“单个模块职责”，再按下面的顺序阅读源码。
+
 学习：
 
 - Embedding、Attention、FFN、Residual、Norm
@@ -209,10 +345,26 @@ uv run python ch02/05_use_model/generate_simple.py \
 - `TransformerBlock.forward`
 - `FeedForward.forward`
 
-当天产出：完成一张模型组件对比表，至少包含归一化、位置编码、FFN、
-Attention 和权重命名。
+当天产出：一张 Qwen3 前向数据流图和模块输入/输出表；起草模型组件对比表，
+在 Day 5 再补齐具体 Llama/Qwen/DeepSeek 版本的差异。
 
 ### Day 3：Attention、MHA、MQA、GQA
+
+可执行教程：[Day 3 调试与 Shape 验证](docs/DAY03_SHAPES_DEBUGGING.md)。
+先完成 Day 2 的模块职责复述，再执行 hooks、断点和因果性验证。
+已经使用 Jupyter 时，可直接打开
+[Day 3 交互式 Notebook](learning/day03_debug.ipynb)，不必创建新容器。
+RoPE 和 FFN 门控的补充材料见
+[形象解释](docs/ROPE_SWIGLU_INTUITION.md) 与
+[旋转、SiLU 和小 FFN 实验](learning/day03_rope_swiglu.ipynb)。
+
+```bash
+docker compose -f docker-compose.spark.yml run --rm reasoning \
+  python learning/day03_shapes.py --config tiny --device cpu \
+  --output logs/day03-tiny-shapes.json
+```
+
+小模型通过后，再按教程使用 Qwen3 本地权重和 CUDA；脚本不自动下载模型。
 
 学习：
 
@@ -240,6 +392,9 @@ logits        [B, T, vocab_size]
 
 ### Day 4：RoPE、KV Cache、Prefill 和 Decode
 
+可执行 Notebook：[Day 4 KV Cache 实验](learning/day04_kv_cache.ipynb)；
+配套说明：[Day 4 KV Cache 教程](docs/DAY04_KV_CACHE.md)。
+
 学习：
 
 - RoPE 的旋转方式
@@ -259,7 +414,21 @@ logits        [B, T, vocab_size]
 2. Decode 阶段复用了什么？
 3. 每层 Cache 中的 K/V 形状是什么？
 
+实践：使用相同权重、固定 8 token 输入，对比一次完整前向和 Cache 的
+`7 token prefill + 1 token decode`，验证最后位置 logits 的数值一致性。
+Tiny FP32 要求严格对齐；真实 Qwen3 BF16 记录最大误差和 top-1 一致性，
+不要把 BF16 逐元素误差直接当成逻辑失败。每次独立运行都重置 Cache 和位置状态。
+这一天调用已有模型验证，尚不要求手写 Cache。
+
 ### Day 5：MoE 和 MLA
+
+配套说明：[Day 5 架构、MoE 和 MLA 教程](docs/DAY05_ARCHITECTURES.md)；
+配套 Notebook：[Day 5 架构图和路由实验](learning/day05_architecture_map.ipynb)。
+字段已经熟悉后，补做 [配置、投影参数与内存](learning/day05_config_memory.ipynb)，
+分清权重、KV Cache 和单层 score 三类内存，避免只记头数和宽度。
+MLA 专项：[直观解释与手算](docs/MLA_INTUITION.md)、
+[展开 KV / latent 计算对齐实验](learning/day05_mla_intuition.ipynb)。
+这项实验只验证同一低秩结构的计算等价，不代表已复现完整 DeepSeek。
 
 学习：
 
@@ -273,6 +442,10 @@ logits        [B, T, vocab_size]
 计算、参数激活量还是 KV Cache。
 
 ### Day 6：GPU、CUDA、Triton 和 FlashAttention
+
+先读 [Day 6 Online Softmax 图解与手算](docs/DAY06_ONLINE_SOFTMAX.md)，
+打开 [两块数字实验](learning/day06_online_softmax.ipynb)，再运行
+统一入口 `learning/day06_course.ipynb`。从数学参考开始，不要求今天完成生产GPU kernel。
 
 学习：
 
@@ -329,7 +502,9 @@ mini_transformer/
 - 实现 RoPE 参数生成和旋转。
 - 用固定随机输入与仓库实现对齐。
 
-验收：最大误差小于 `1e-4`。
+验收：先在固定输入、FP32 和小 Shape 下与参考实现对齐，可从
+`atol=1e-4, rtol=1e-4` 开始，同时记录最大绝对误差；BF16/FP16 另设容差，
+不要沿用 FP32 阈值判断所有低精度实现。
 
 ### Day 9：单头 Attention
 
@@ -407,6 +582,10 @@ Vector Add
 
 ### Day 17：Triton 入门
 
+补充实验：[Triton IR讲义](docs/TRITON_IR.md)、
+[实际编译产物Notebook](learning/day17_triton_ir.ipynb)。
+IR全称Intermediate Representation；观察编译链不等于kernel性能验收。
+
 - 重写 Vector Add。
 - 实现 RMSNorm。
 - 学习 `program_id`、块指针和 Mask。
@@ -436,6 +615,9 @@ Vector Add
 - 避免保存完整 attention score。
 - 与 `torch.nn.functional.scaled_dot_product_attention` 对比。
 
+时间不足时先交付正确的 Online Softmax 分块参考实现，再列出 GPU Kernel
+待完成项；不能把阅读教程或调用 SDPA 标记为独立实现 FlashAttention。
+
 ### 第 3 周验收
 
 - [ ] 至少完成 3 个 Triton 算子。
@@ -454,11 +636,14 @@ Vector Add
 - 观察 Prefill 和 Decode。
 - 记录输入长度、输出长度、延迟和吞吐。
 
+在独立环境中核对 ARM64/GB10 兼容性，不覆盖当前 Spark 学习镜像的依赖。
+若安装受阻，记录具体阻塞和已完成的源码分析，不能将模拟器结果当成 vLLM 实测。
+
 ### Day 23：PagedAttention
 
 - 阅读 KV Block 的分配和回收逻辑。
-- 实现一个教学级 Paged KV Cache。
-- 支持逻辑位置到物理 Block 的映射。
+- 推导教学级 Paged KV Cache 的数据结构。
+- 画出逻辑位置到物理 Block 的映射，为 Day 25 的实现准备测试样例。
 
 ### Day 24：Continuous Batching
 
@@ -499,6 +684,9 @@ Vector Add
 - tokens/s。
 - 峰值显存。
 - 活跃请求数。
+
+若只有调度模拟器，只报告模拟的排队、占用和调度指标；只有接入真实模型执行后，
+才能报告实测 GPU tokens/s、首 token 延迟和峰值显存。
 
 ### Day 28：选择一个优化方向
 

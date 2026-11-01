@@ -1,0 +1,44 @@
+services:
+  reasoning:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+      args:
+        UV_VERSION: "0.13.6"
+        USE_PYPI_TORCH: "0"
+        INSTALL_BUILD_TOOLS: "1"
+    image: reasoning-from-scratch:spark
+    working_dir: /workspace
+    network_mode: host
+    devices:
+      - nvidia.com/gpu=all
+    shm_size: "8gb"
+    environment:
+      DEVICE: cuda
+      HF_HOME: /workspace/.cache/huggingface
+      HUGGINGFACE_HUB_CACHE: /workspace/.cache/huggingface/hub
+      TORCH_HOME: /workspace/.cache/torch
+      MPLCONFIGDIR: /workspace/.cache/matplotlib
+      JUPYTER_CONFIG_DIR: /workspace/.cache/jupyter
+      TOKENIZERS_PARALLELISM: "false"
+      TRITON_CACHE_DIR: /workspace/.cache/triton
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
+    volumes:
+      - reasoning_workspace:/workspace
+    stdin_open: true
+    tty: true
+    command:
+      - jupyter
+      - lab
+      - --ip=127.0.0.1
+      - --port=8888
+      - --no-browser
+      - --allow-root
+      - --IdentityProvider.token=reasoning
+
+volumes:
+  reasoning_workspace:
+    name: ${SPARK_WORKSPACE_VOLUME:-reasoning_spark_workspace}

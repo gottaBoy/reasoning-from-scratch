@@ -1,8 +1,14 @@
 # Docker 学习环境
 
+本机为 DGX Spark（ARM64 / NVIDIA GB10）时，优先使用
+[DGX Spark 实战教程](DGX_SPARK.md) 的独立 Compose 配置；其中包括 CUDA
+实际运算自检、代理、缓存复用和逐阶段验证记录。通用 CPU/GPU 命令见本文。
+
 这个仓库的 Docker 配置默认不把源码目录 bind mount 到容器，而是把完整源码放进镜像，再复制到 Docker named volume `reasoning_workspace`。因此模型、数据集、日志、checkpoint 和 notebook 修改都不会写入宿主机仓库。
 
-注意：named volume 第一次启动时才会从镜像初始化。镜像更新后若要重新同步仓库内源码，执行 `docker compose down -v` 后再启动；这只删除 Docker volume，不会删除宿主机仓库。
+注意：named volume 第一次启动时才会从镜像初始化，重建镜像不会覆盖其中的源码
+和笔记。不要用 `down -v` 更新代码，它会连同模型、checkpoint 和学习进度一起
+删除；优先创建新的工作 volume，或备份后选择性同步源码。
 
 ## 1. 启动 JupyterLab
 
@@ -24,7 +30,7 @@ docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.gpu.yml run --rm reasoning \
-  python -c "import torch; print(torch.__version__); print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
+  python docker/check_environment.py --device cuda
 ```
 
 ## 2. 直接运行脚本
@@ -108,9 +114,9 @@ Smoke run 通过后，再按下方路线逐章增加数据量；不要直接把 
 | ch04 推理扩展 | CoT、自洽采样各 1 题 | `num_samples=3/5/10`、batched |
 | ch05 自我改进 | self-refinement、best-of-N 各 1 题 | scorer、迭代次数、完整 MATH-500 |
 | ch06 GRPO | 默认跳过；`RUN_TRAINING=1` 时 1 step | 50/100 steps、batched、FSDP |
-| ch07 GRPO 改进 | 通过 ch06/ch08 共用组件验证 | tracking、clip、KL、format reward、Olmo/DeepSeek/GDPO |
+| ch07 GRPO 改进 | `RUN_ADVANCED_TRAINING=1` 时 format reward 1 step | 其他变体须分别执行，不能由共用组件推定通过 |
 | ch08 蒸馏 | 自带 5 条样例、1 epoch | 50/500 条、think tokens、HF 导出 |
-| Appendix C--G | 通过包导入和快速测试验证基础接口 | 按依赖运行 Qwen3、批处理、评测、Chainlit |
+| Appendix C--G | 仅普通测试实际覆盖到的接口 | 未安装的 datasets/Chainlit 和外部服务不算已验证 |
 
 ## 5. 哪些例子不能无条件自动跑
 

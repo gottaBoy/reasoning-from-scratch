@@ -42,6 +42,14 @@ git clone --depth 1 https://github.com/rasbt/reasoning-from-scratch.git
 
 > **Docker:**
 > To run the examples without installing Python packages or writing models, datasets, logs, or checkpoints into the host checkout, see the [Docker quickstart and one-week study plan](DOCKER.md).
+>
+> **DGX Spark:** ARM64 / NVIDIA GB10 setup and validation are covered in the
+> [DGX Spark tutorial](DGX_SPARK.md). See also the
+> [30-day study plan](LLM_30_DAY_STUDY_PLAN.md).
+>
+> 训练与部署硬件选择：[DGX Spark vs RTX 3090](DGX_SPARK_VS_RTX3090.md)。
+> Daily concepts, exercises, and interview questions are indexed in the
+> [30-day knowledge guide](docs/KNOWLEDGE_INDEX.md).
 
 <br>
 <br>
