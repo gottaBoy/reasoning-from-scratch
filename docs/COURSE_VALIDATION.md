@@ -22,6 +22,10 @@
 CUDA Toolkit 13.0。保留 PyTorch 对 `sm_121` capability 的提示；
 这里的实际 kernel 都已运行，但不推断所有第三方扩展兼容。
 
+后续已将提交 `87428f3` 的课程构建进独立镜像，并在全新 volume 中重跑完整 smoke、
+普通测试和课程 Notebook；见 [课程镜像验收记录](IMAGE_VALIDATION.md)。
+以下保留原学习卷上的历史验证，不混用两次运行的日志。
+
 ## 实测项目
 
 - Online Softmax 的大幅值数值稳定和分块 Attention 与 SDPA 对齐。

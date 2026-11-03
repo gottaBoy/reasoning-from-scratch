@@ -212,6 +212,24 @@ SPARK_WORKSPACE_VOLUME=reasoning_spark_next \
   python docker/check_environment.py --device cuda
 ```
 
+GPU 自检通过不代表新课程已进入镜像。发布课程改动后，先重建镜像，再使用独立
+Compose 项目和全新 volume 验证课程文件及普通测试，不挂载宿主机源码：
+
+```bash
+SPARK_WORKSPACE_VOLUME="reasoning_spark_check_$(date -u +%Y%m%dT%H%M%SZ)" \
+  docker compose -p reasoning-course-check -f docker-compose.spark.yml \
+  run --rm --no-deps reasoning sh -lc \
+  'test -f learning/curriculum.py &&
+   test -f learning/day30_course.ipynb &&
+   SKIP_EXPENSIVE=1 RUN_REAL_DOWNLOAD_TESTS=0 python -m pytest -q tests'
+```
+
+普通测试仍可能下载 tokenizer 和数据，需配置本教程前面说明的代理。
+只复用模型/数据缓存不影响源码独立性；不要把旧工作区的源码一起复制过来。
+`learning.sync_workspace` 只同步现有学习卷中的课程，不能代替重建镜像。
+实际新镜像、新卷的完整 smoke 与 Notebook 验收见
+[课程镜像验收记录](docs/IMAGE_VALIDATION.md)。
+
 不要为更新代码直接执行 `down -v`；它会删除容器中的模型、训练结果和笔记。
 停止容器但保留数据只需要：
 
