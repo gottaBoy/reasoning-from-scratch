@@ -3,6 +3,8 @@
 前置阅读：[Day 1–2 学习笔记](DAY01_DAY02_NOTES.md)。
 对应 [30 天计划](../LLM_30_DAY_STUDY_PLAN.md) 的 Day 3；今天用仓库实现验证理解，
 不开始第二周的独立重写，也不要求立刻理解全部 RoPE 公式。
+符号与轴顺序见 [统一规范](NOTATION.md)；本页旧实验的 `H/KV/D` 分别对应
+`Hq/Hkv/D`，其中Q/K/V每头维度相同。
 
 对 RoPE、`gate_proj/up_proj/down_proj` 或 SiLU 还不直观时，先看
 [形象解释](ROPE_SWIGLU_INTUITION.md) 和

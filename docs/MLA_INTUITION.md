@@ -3,6 +3,8 @@
 **MLA = Multi-head Latent Attention，多头潜在注意力。**
 这里以 DeepSeek-V2 的联合低秩 KV 思路和 DeepSeek-V3 的官方推理代码解释；
 不是所有名字带“latent”的 Attention 都有完全相同的实现。
+通用字母与形状见 [符号规范](NOTATION.md)；本文 `latent_rank` 对应 `r_kv`，
+`rope_key_dim` 对应独立位置Key宽度 `D_rope`，不要与KV头数混淆。
 
 ## 1. 你已经理解的 Cache 在存什么
 

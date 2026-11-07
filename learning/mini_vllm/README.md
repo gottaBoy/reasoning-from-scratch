@@ -2,6 +2,9 @@
 
 核心代码：
 
+从图解入门：[四个角色、抽屉存储、内存生命周期与debug步骤](../../docs/DAY07_KV_LIFECYCLE.md)；
+对应实验为 `learning/day07_kv_lifecycle.ipynb`，直接复用下列实现，不另写假分页器。
+
 - `paged_kv_cache.py`：固定块、请求 block table、所有权、OOM 和回收。
 - `scheduler.py`：sequential/static/continuous 的离散轮次模拟。
 - `engine.py`：真正调用小 Transformer 的同长度分桶合批、Cache 拆回请求。

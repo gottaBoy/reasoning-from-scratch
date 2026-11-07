@@ -44,7 +44,8 @@ def build(directory):
                     f"参考源码：`learning/{source}`。\n\n"
                     f"每日概念、误区、面试问答："
                     f"[知识讲义](../docs/KNOWLEDGE_DAY{week}.md)。\n\n"
-                    "当前个人进度仍为 Day 5；运行参考答案不等于已独立掌握。"
+                    "当前个人进度以[进度记录](../docs/LEARNING_PROGRESS.md)为准；"
+                    "运行参考答案不等于已独立掌握。"
                 ),
                 nbformat.v4.new_markdown_cell(
                     "## 先预测\n\n执行前写下预期 shape、输出或调度顺序；"

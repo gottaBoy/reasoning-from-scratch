@@ -1,9 +1,17 @@
 # 每日关键知识与面试索引
 
-个人进度：[Day 5](LEARNING_PROGRESS.md)。以下是学习材料，不是已通过的能力证书。
+当前学习位置：[Day 7，学习中](LEARNING_PROGRESS.md)。
+今日行动与个人验收见 [Day 7学习记录](DAY07_STUDY_LOG.md)。
+以下是学习材料，不是已通过的能力证书。
 跨天模拟面试、场景题与自评分见 [面试训练](INTERVIEW_PRACTICE.md)。
 按五个工程方向继续实践见 [推理优化与工程路线](INFERENCE_ENGINEERING_PATH.md)。
 Triton编译术语见 [IR讲义与真实产物实验](TRITON_IR.md)。
+所有课程的字母、英文全称、配置映射和轴顺序统一查阅
+[课程符号与张量形状规范](NOTATION.md)，包含Prefill/Decode、GQA、MLA与Online Softmax。
+特殊符号的名称、中文读法、英文读音提示和整条公式朗读集中在该规范第7节，
+例如alpha、theta、ell、求和符号与逐元素乘符号。
+Day 7的Request、Scheduler、KV Manager、Attention Kernel形象实例和深入资料，
+见 [一条请求与抽屉生命周期](DAY07_KV_LIFECYCLE.md)。
 
 | 学习日 | 主线 | 知识讲义 | 实验 |
 | --- | --- | --- | --- |

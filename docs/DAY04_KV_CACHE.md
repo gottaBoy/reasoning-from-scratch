@@ -2,6 +2,8 @@
 
 打开 [Day 4 Notebook](../learning/day04_kv_cache.ipynb)，从上到下运行。
 它默认使用 Tiny 模型和固定输入，先证明机制，再切换真实 Qwen3。
+字母与Cache轴顺序见 [统一规范](NOTATION.md)；本页轴名 `KV` 指 `Hkv`，
+Cache长度是 `T_kv`，不一定等于本轮Query长度 `T_q`。
 
 ## 你要观察什么
 

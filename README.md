@@ -50,6 +50,8 @@ git clone --depth 1 https://github.com/rasbt/reasoning-from-scratch.git
 > 训练与部署硬件选择：[DGX Spark vs RTX 3090](DGX_SPARK_VS_RTX3090.md)。
 > Daily concepts, exercises, and interview questions are indexed in the
 > [30-day knowledge guide](docs/KNOWLEDGE_INDEX.md).
+> Symbols, configuration aliases, and tensor axes are defined in the
+> [course notation guide](docs/NOTATION.md).
 
 <br>
 <br>

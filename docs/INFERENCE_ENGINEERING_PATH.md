@@ -1,6 +1,6 @@
 # 推理优化、系统、部署与工程实践：五方向衔接
 
-当前个人学习位置仍为 **Day 5**。已有参考实现与通过记录，不能自动换成个人
+当前个人学习位置统一见 [进度记录](LEARNING_PROGRESS.md)。已有参考实现与通过记录，不能自动换成个人
 项目经历或生产部署能力。每天知识和面试题见 [索引](KNOWLEDGE_INDEX.md)。
 
 ## 1. 五个方向分别解决什么
@@ -109,7 +109,7 @@ non-streaming总时间不是TTFT；小随机模型三请求实验不是正式容
 
 **现在可以直接做：**
 
-- 在现有Jupyter继续Day 6，不重建环境。
+- 在现有Jupyter按 [统一进度](LEARNING_PROGRESS.md) 继续学习，不因翻页重建环境。
 - 用已准备的参考实现做数值、Cache、分页与调度实验。
 - 在Spark跑CUDA/Triton教学kernel并查看真实IR。
 - 回答面试主问/追问，再用实验验证答案。
@@ -121,5 +121,5 @@ non-streaming总时间不是TTFT；小随机模型三请求实验不是正式容
 - 量化/Speculative/CUDA Graph/多卡等独立优化方向。
 - 正式质量评测、持续并发压测与生产SLO。
 
-个人进度见 [Day 5](LEARNING_PROGRESS.md)；参考实现验证见
+个人进度见 [学习记录](LEARNING_PROGRESS.md)；参考实现验证见
 [课程验证](COURSE_VALIDATION.md)，不要把“代码存在”替代“已部署与验证”。

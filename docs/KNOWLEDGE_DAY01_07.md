@@ -105,6 +105,8 @@ MLA 改变 KV 表示；教学理解为 latent KV 与位置分支，不是简单�
 MLA 不直观时，先看 [两数生成多头 K/V 的解释](MLA_INTUITION.md)，
 再运行 [展开与 latent 两条路径的对齐实验](../learning/day05_mla_intuition.ipynb)。
 每层每个 token 的 latent 分别保存，不是把整段历史合成一个摘要。
+E/H/D还没串起来时，先做 [Attention逐步手算](ATTENTION_HAND_CALC.md)，
+区分“拆头、匹配、汇集、合并头、输出投影、残差相加”，再进入Day 6。
 
 **面试主问**：MoE 能否同时省参数内存和计算？
 **答案要点**：主要减少每 token 激活计算，相对同总参数 dense；权重仍需存储或分布，
@@ -118,6 +120,9 @@ MLA 不直观时，先看 [两数生成多头 K/V 的解释](MLA_INTUITION.md)�
 
 **核心概念**：IO-aware tiling、稳定 softmax、每行 running maximum/denominator/numerator。
 FP16、B=1、H=16、T=4096 时，单张 score 矩阵约 `16×4096²×2=512 MiB`。
+规范名称为Running Row Maximum、Running Softmax Normalizer、
+Unnormalized Attention Output Accumulator；它们是变量角色名，不是缩写全称。
+希腊字母、`ℓ/∑/⊙`和完整公式的读法见 [统一符号规范第7节](NOTATION.md)。
 
 **公式**：新 score 块 s，`m'=max(m,max(s))`，`α=exp(m-m')`，
 `l'=αl+Σexp(s-m')`，`o'=αo+exp(s-m')V`，最终 `o/l`。
@@ -127,6 +132,8 @@ FP16、B=1、H=16、T=4096 时，单张 score 矩阵约 `16×4096²×2=512 MiB`�
 入口：`learning/day06_course.ipynb`、`learning/online_attention.py`。
 第一次学习时先看 [两块小数字的手算解释](DAY06_ONLINE_SOFTMAX.md) 和
 [逐步实验](../learning/day06_online_softmax.ipynb)，再读压缩版递推公式。
+继续看讲义第6–7节，分清“数学上可分块”和“GPU上减少全局内存IO”；
+补做向量Value与理论数组大小实验。520 bytes只是单行m/l/o，不是整个Attention内存。
 
 **面试主问**：FlashAttention 是否把 dense prefill 复杂度从 T² 降为 T？
 **答案要点**：不改变 exact dense attention 的主要算术复杂度，主要优化 IO/中间存储，
@@ -145,7 +152,15 @@ Continuous batching 在迭代边界调整请求集合；Paged KV 管理物理块
 但是否提速由输入长度、硬件、调度开销和 SLO 决定。
 
 **实验**：用短/长/晚到请求画 sequential/static/continuous 的轮次。
-入口：`learning/day07_course.ipynb`、`learning/mini_vllm/scheduler.py`。
+先看 [Day 7讲义](DAY07_SCHEDULER_MAP.md)，运行
+[A/B/C逐轮实验](../learning/day07_vllm_map.ipynb)，在
+[Day 7学习记录](DAY07_STUDY_LOG.md)中填写预测与个人结果。
+原 `learning/day07_course.ipynb` 保留为统一报告入口，参考实现为
+`learning/mini_vllm/scheduler.py`；不新增真实模型服务依赖。
+存储/调用还不直观时，看 [四角色与抽屉图解](DAY07_KV_LIFECYCLE.md)，
+运行 [真实页池与随机小模型](../learning/day07_kv_lifecycle.ipynb)：
+观察借页、写KV、逻辑映射、释放不清零、旧handle失效、异常finally回收。
+官方Cache、架构、PagedAttention与kernel阅读顺序列在图解末尾。
 
 **面试主问**：Continuous batching 的代价是什么？
 **答案要点**：请求/Cache 生命周期更复杂，prefill/decode 争资源，存在公平、饥饿、

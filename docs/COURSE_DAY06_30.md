@@ -1,6 +1,8 @@
 # Day 6–30 可执行课程
 
-个人进度固定为 **Day 5**，见 [进度记录](LEARNING_PROGRESS.md)。
+当前学习位置统一见 [进度记录](LEARNING_PROGRESS.md)，不在各课程副本中固定学习日。
+当前行动入口见 [Day 7学习记录](DAY07_STUDY_LOG.md)，Day 6收尾见
+[Day 6学习记录](DAY06_STUDY_LOG.md)。
 本页记录后续材料与参考实验已经准备，不能代替个人理解或面试验收。
 所有天的原理、公式、误区、面试问答见 [每日关键知识](KNOWLEDGE_INDEX.md)。
 五方向的实践顺序与未完成的部署边界见 [推理工程路线](INFERENCE_ENGINEERING_PATH.md)。
@@ -122,7 +124,7 @@ VLLM_BASE_URL=http://127.0.0.1:8000/v1 \
 ## 验证与学习状态
 
 自动执行结果见 [课程验证记录](COURSE_VALIDATION.md)，而个人进度仍由
-[Day 5 进度表](LEARNING_PROGRESS.md) 维护。
+[统一进度表](LEARNING_PROGRESS.md) 维护。
 建议按“先口述 → 写预测 → 独立尝试 → 参考对齐 → 改错 → 回答面试追问”学习，
 不要一次 Run All 后就把 30 天标为精通。
 

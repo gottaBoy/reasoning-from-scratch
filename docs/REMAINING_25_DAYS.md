@@ -1,7 +1,8 @@
 # 剩余 25 天执行包
 
-当前学习位置为 **Day 5**，个人验收由学习者填写；后面还有
-**Day 6–30，共 25 个学习日**。
+本包覆盖 **Day 6–30，共25个学习日（含Day 6）**；
+“剩余25天”是从Day 5整理材料时的名称，不表示今天另有25天尚未开始。
+当前学习位置见 [进度记录](LEARNING_PROGRESS.md)，个人验收由学习者填写。
 本文件把后续任务转换成可执行的入口、产出和验收标准。
 配套的 25 份每日 Notebook 与参考实现已经准备，实际入口以
 [课程总表](COURSE_DAY06_30.md) 为准；以下旧目录树是练习拆分建议，不表示每个
@@ -22,6 +23,8 @@
 
 入口：
 
+- [Day 6学习记录](DAY06_STUDY_LOG.md)
+- [Online Softmax图解](DAY06_ONLINE_SOFTMAX.md) 与 `learning/day06_online_softmax.ipynb`
 - `docker/check_triton.py`
 - `docs/DAY03_SHAPES_DEBUGGING.md`
 - `reasoning_from_scratch/qwen3.py:219`
@@ -44,6 +47,10 @@ learning/day06_online_softmax.ipynb
 
 ### Day 7：vLLM 机制地图
 
+具体入口：[Day 7学习记录](DAY07_STUDY_LOG.md)、
+[调度与分页讲义](DAY07_SCHEDULER_MAP.md)和
+[可运行Notebook](../learning/day07_vllm_map.ipynb)。
+
 本仓库没有生产 vLLM 实现，今天只建立机制映射：
 
 ```text
@@ -60,7 +67,7 @@ learning/day06_online_softmax.ipynb
 产出：
 
 ```text
-docs/DAY07_VLLM_MAP.md
+docs/DAY07_SCHEDULER_MAP.md
 learning/day07_vllm_map.ipynb
 ```
 

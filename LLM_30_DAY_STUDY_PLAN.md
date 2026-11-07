@@ -18,11 +18,15 @@
 
 ## 当前进度与执行起点
 
-**当前学习进度固定为 Day 5。** 详见 [进度记录](docs/LEARNING_PROGRESS.md)。
-Day 6–30 的材料自动准备不改变个人完成状态；旧的 Day 2 启动清单保留作复习。
+**当前学习位置：Day 7，请求生命周期与调度地图。**
+2026-11-07用户要求完善Day 6教程并继续下一天，详见
+[进度记录](docs/LEARNING_PROGRESS.md)和[Day 7学习记录](docs/DAY07_STUDY_LOG.md)。
+材料自动准备不改变个人完成状态；旧的 Day 2 启动清单保留作复习。
 后续参考实现、每日 Notebook 和验证入口见 [Day 6–30 课程](docs/COURSE_DAY06_30.md)。
 **每日知识点、概念、公式、误区、面试主问/追问与掌握标准**见
 [30 天知识与面试索引](docs/KNOWLEDGE_INDEX.md)，覆盖 Day 1–30。
+公式中的字母、张量轴和配置名称统一查阅
+[课程符号与张量形状规范](docs/NOTATION.md)；首次阅读Attention形状时从此处查起。
 五个工程方向的衔接见 [推理优化与工程实践](docs/INFERENCE_ENGINEERING_PATH.md)，
 算子编译补充见 [Triton IR](docs/TRITON_IR.md)。
 
@@ -33,11 +37,13 @@ Day 6–30 的材料自动准备不改变个人完成状态；旧的 Day 2 启�
 | --- | --- | --- |
 | Spark 镜像、CUDA 前后向、Triton JIT | 已实测通过 | 环境准备完成，不必每天重建 |
 | Qwen3 生成和小规模推理/训练 smoke | 已实测通过 | 有可运行的参考实现，不等于已经理解模型 |
-| 普通测试（含新增课程） | 282 passed / 27 skipped | 是运行基线，不是个人掌握程度评分；历史报告另行保留 |
+| 普通测试（含新增课程） | 301 passed / 27 skipped | 现有Spark工作区缓存数据回归；不是个人掌握评分，历史与失败记录另行保留 |
 | Day 1 独立复现与笔记 | 待自己验收 | 独立运行一次生成，能找到设备、Cache 和日志 |
 | Day 2–4 模型、Shape、Cache | 已讲解并准备实验 | 个人理解仍需用自测题确认 |
-| Day 5 架构、MoE、MLA | 当前主任务 | 按此位置继续学习 |
-| Day 6–30 的学习产出 | 材料自动准备，个人尚未验收 | 按每日 Notebook 和每周检查点推进 |
+| Day 5 架构、MoE、MLA | 本轮讲解结束，用户决定进入下一天 | 独立自测结果尚未登记 |
+| Day 6 Online Softmax/FlashAttention | 本轮教程收尾，个人独立验收尚未登记 | 参考实验通过不代替个人掌握 |
+| Day 7 请求生命周期与调度 | 当前主任务，学习中 | 从A/B/C调度轨迹和分页映射开始 |
+| Day 8–30 的学习产出 | 材料自动准备，个人尚未验收 | 按每日 Notebook 和每周检查点推进 |
 
 运行证据见 [Spark 验证记录](docs/DGX_SPARK_VALIDATION.md)。
 不需要重新执行整套 smoke 才能开始学习，也不能因为 smoke 通过就跳过第二周。
@@ -79,14 +85,14 @@ Day 1 已完成项、Day 2 的数据流/模块讲解及自测题见
 今天不以“读完全部文件”为目标。验收是：不用照着代码，也能解释一次前向传播
 经过哪些模块，以及 logits 和最终生成 token 的区别。
 
-### 接下来五个学习日
+### Day 3–7安排与复习
 
 | 学习日 | 具体行动 | 当天验收 |
 | --- | --- | --- |
 | Day 3 | 对已有 Attention 打印/断点观察 `view`、`transpose`、KV head 扩展前后的形状 | 用 `B=1,T=8` 完成 Q/K/V、scores、context、logits 表，并解释 `128` 为什么不一定等于 `1024/16` |
 | Day 4 | 同一组固定输入，一次输入 8 token，对比 Cache prefill 7 token 后再输入 1 token | 比较最后位置 logits，而非采样文本；记录误差、位置偏移和每层 K/V 形状 |
 | Day 5 | 完成架构差异笔记和 MoE/MLA 数据流图 | 比较时注明具体模型版本；说清各机制改变的是哪部分数据流或资源开销 |
-| Day 6 | 阅读已跑通的 `docker/check_triton.py`，标注 program、offset、mask 和 launch grid | 能解释为何测试长度用 1003/65537，以及去掉边界 mask 的风险 |
+| Day 6 | 先做Online Softmax手算和Notebook，再选读 `docker/check_triton.py` 中program、offset、mask | 能解释m/l/o合并、IO收益与边界；GPU索引作为后续补充 |
 | Day 7 | 整理请求生命周期与分页缓存/调度概念图，完成第一周复盘 | 能把 GQA、KV Cache、FlashAttention、PagedAttention、Continuous Batching 的职责分开说明 |
 
 Day 4 先使用小配置、FP32 和固定权重建立数值参考，每次独立实验使用新的 Cache
@@ -426,6 +432,8 @@ Tiny FP32 要求严格对齐；真实 Qwen3 BF16 记录最大误差和 top-1 一
 配套 Notebook：[Day 5 架构图和路由实验](learning/day05_architecture_map.ipynb)。
 字段已经熟悉后，补做 [配置、投影参数与内存](learning/day05_config_memory.ipynb)，
 分清权重、KV Cache 和单层 score 三类内存，避免只记头数和宽度。
+拆头后继续 [Attention汇集到残差的手算](docs/ATTENTION_HAND_CALC.md) 和
+[逐步Notebook](learning/day05_attention_handcalc.ipynb)，分清合并头与输出投影。
 MLA 专项：[直观解释与手算](docs/MLA_INTUITION.md)、
 [展开 KV / latent 计算对齐实验](learning/day05_mla_intuition.ipynb)。
 这项实验只验证同一低秩结构的计算等价，不代表已复现完整 DeepSeek。
@@ -459,6 +467,14 @@ MLA 专项：[直观解释与手算](docs/MLA_INTUITION.md)、
 `[B, H, T, T]` attention score 矩阵。
 
 ### Day 7：vLLM 机制总览
+
+先看 [Day 7学习记录](docs/DAY07_STUDY_LOG.md)和
+[请求调度、Continuous Batching与Paged KV讲义](docs/DAY07_SCHEDULER_MAP.md)，
+运行 [A/B/C调度实验](learning/day07_vllm_map.ipynb)。
+原 `day07_course.ipynb` 保留为统一参考报告入口，不需要部署真实vLLM才开始。
+四个角色、真实存储和生命周期用 [工作台/抽屉图解](docs/DAY07_KV_LIFECYCLE.md)
+及 [KV存取Notebook](learning/day07_kv_lifecycle.ipynb) 补齐；
+debug先看所有权与有效长度，再看调用批次，最后做单变量性能实验。
 
 学习：
 

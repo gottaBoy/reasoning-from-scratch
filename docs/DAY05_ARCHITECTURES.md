@@ -3,6 +3,8 @@
 Day 5 的目标是建立“配置到数据流”的阅读能力，不是今天复刻三个生产模型。
 先区分：模型名称是家族，具体 checkpoint/版本才决定真实配置；比较时必须记录
 模型版本、参数 dtype、实现仓库和是否做过量化。
+全文的 `E/L/Hq/Hkv/D/F`、配置名称对应及跨框架符号差异统一见
+[课程符号与张量形状规范](NOTATION.md)。
 
 ## 1. 先用同一张表比较
 
@@ -62,21 +64,69 @@ hidden_dim  = 3072       # 本仓库：FFN 内部的宽度
 把一个 token 看成表格的一行。Block 不断改写这一行，进入不同计算分支时，
 这一行临时变成不同宽度：
 
-| 统一符号 | 直觉问题 | 本仓库字段 | Qwen3 0.6B 示例 |
-| --- | --- | --- | --- |
-| `E` | 进入/离开 Block，每行有多少个数？ | `emb_dim` | 1024 |
-| `L` | 这样的 Block 串联多少次？ | `n_layers` | 28 |
-| `Hq` | Q 分成多少个查询头？ | `n_heads` | 16 |
-| `Hkv` | K 和 V 各有多少个独立头？ | `n_kv_groups` | 8 |
-| `D` | 每个头包含多少个数？ | `head_dim` | 128 |
-| `F` | FFN 中间分支展开到多宽？ | `hidden_dim` | 3072 |
-| `θ` | RoPE 各对特征转多快的频率参数？ | `rope_base` | 1_000_000 |
+| 统一符号 | 英文名称 | 直觉问题 | 本仓库字段 | Qwen3 0.6B 示例 |
+| --- | --- | --- | --- | --- |
+| `E` | Embedding / Model Dimension | 进入/离开 Block，每行有多少个数？ | `emb_dim` | 1024 |
+| `L` | Number of Transformer Layers | 这样的 Block 串联多少次？ | `n_layers` | 28 |
+| `Hq` | Number of Query Heads | Q 分成多少个查询头？ | `n_heads` | 16 |
+| `Hkv` | Number of Key/Value Heads | K 和 V 各有多少个独立头？ | `n_kv_groups` | 8 |
+| `D` | Head Dimension | 每个头包含多少个数？ | `head_dim` | 128 |
+| `F` | Feed-Forward Intermediate Dimension | FFN 中间分支展开到多宽？ | `hidden_dim` | 3072 |
+| `θ` | RoPE Frequency Base | RoPE 各对特征转多快的频率参数？ | `rope_base` | 1_000_000 |
+
+FFN全称为Feed-Forward Network（前馈神经网络）；E/F在论文中也常写作
+`d_model/d_ff`。这些是局部符号约定，不要求每个字母都有唯一的英文缩写展开。
 
 这里把 Q/K/V head dimension 相同作为本实现的前提。其他模型的 Q/K/V 维度
 可能不同，尤其 MLA 需要另外分析。
 
 不要先背英文名字，先回答这七个中文问题。
 口诀：**主路看 E，深度看 L，Q 头 Hq，KV 头 Hkv，每头 D，FFN 看 F，位置看 θ。**
+
+把它们放在同一条宽度流中：
+
+```text
+主干 x：      [B,T,E]
+                │
+   Attention：  E → Q:[Hq×D_k]，K:[Hkv×D_k]，V:[Hkv×D_v]
+                │
+   合并头：     Hq×D_v → 输出投影 → E
+                │
+   FFN：        E → F（gate/up两条）→ 相乘 → E（down）
+```
+
+这里的关系分三类：
+
+```text
+必然由张量拼接得到：
+Q width = Hq×D_k
+K width = Hkv×D_k
+V width = Hkv×D_v
+Attention输出投影输入 = Hq×D_v
+
+实现接口要求：
+主干输入输出必须回到 E，才能做 residual 相加
+FFN 必须 E → F → E，才能接回主干
+
+模型设计选择：
+D 是否等于 E/Hq
+F 取多大（本配置恰好 F=3E）
+```
+
+用 Qwen3 0.6B 代入：
+
+```text
+E=1024，Hq=16，Hkv=8，D=128，F=3072
+
+Q：1024 → 16×128=2048 → 16个Query heads
+K/V：1024 → 8×128=1024 → 8个KV heads
+Attention合并：16×128=2048 → 输出投影 → 1024
+FFN：1024 → 3072 → 1024
+```
+
+所以 `E` 是“主干道路宽度”，`H` 是“分几条车道”，`D` 是“每条车道宽度”，
+`F` 是“FFN 临时扩建的加工厂宽度”。`T` 只表示有多少个位置经过这条道路，
+不会直接改变这些投影权重的 shape。
 
 ### 2.1.3 把这些数字放进同一张图
 
@@ -158,6 +208,53 @@ self.W_query = nn.Linear(d_in, self.d_out, bias=False)
 因此 `1024/16=64` 算术上没错，但不符合这份配置显式 `head_dim=128` 的定义。
 只有目标实现确实规定 `head_dim=E/Hq` 时，才可以这样推导。
 本仓库是在 `head_dim is None` 时采用这个默认值。
+
+**分叉图可以保留，但要分清分叉的对象。** 正确关系是
+`X → Attention → 第一次残差相加 → Y → FFN → 第二次残差相加 → Z`，
+不是Attention和FFN同时接收X后只相加一次。
+完整的两次残差分叉图见 [统一规范](NOTATION.md) 第1节。
+
+把“投影”和“拆头”拆成两个动作，误解就容易消除：
+
+| 动作 | 做什么 | 能否改变每位置的元素数 | 有无可学习权重 |
+| --- | --- | --- | --- |
+| Linear投影 | 对输入特征做加权组合 | 可以，例如1024变2048 | 有，Q权重为 `[2048,1024]` |
+| view/reshape拆头 | 对已经算好的结果重新分组 | 不可以，2048只能重排成16×128等合法形状 | 无 |
+
+不是“把原来的1024个数切成16份”，而是：
+
+```text
+输入：[B,T,1024]
+  ↓ Linear(1024,2048)，计算得到2048个新特征
+Q：  [B,T,2048]
+  ↓ view(B,T,16,128)，数值不变，只改变分组
+Q：  [B,T,16,128]
+  ↓ transpose(1,2)，交换位置轴和头轴
+Q：  [B,16,T,128]
+```
+
+**恒成立的是 `D=Q投影宽度/Hq`；只有Q投影宽度等于E时，才有 `D=E/Hq`。**
+每个头都可以读取整个1024维输入，并非只从输入中分走64个特征。
+
+用4个数手算，令 `E=4,Hq=2,D=3`：
+
+```text
+x = [a,b,c,d] = [1,2,3,4]
+    ↓ 教学Linear(4,6)，人为定义6个线性组合
+Q = [a+b,b+c,c+d,a-c,b-d,a+b+c+d] = [3,5,7,-2,-2,10]
+    ↓ 拆成2个头
+头0：[3,5,7]
+头1：[-2,-2,10]
+```
+
+这里每头3维，`D=6/2=3`，而 `E/Hq=4/2=2`。
+线性投影提供不同的特征组合，并不凭空创造更多独立信息。
+对应的 [Notebook](../learning/day05_config_memory.ipynb) 可运行此手算例，
+并直接比较仓库Attention显式D与默认D的投影shape。
+
+**继续学习**：理解拆头后，读 [Attention汇集、合并、输出投影手算](ATTENTION_HAND_CALC.md)，
+打开 [对应Notebook](../learning/day05_attention_handcalc.ipynb)。
+它用两个Query头共享一组K/V，说明为何头输出仍可不同，以及如何从4维合并结果回到3维主干。
 
 ### 2.1.6 用实际 Shape 检查，而不是只记数字
 

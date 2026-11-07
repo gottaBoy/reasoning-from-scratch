@@ -16,6 +16,8 @@ def test_generated_notebooks_have_valid_code_and_refuse_replacement(tmp_path):
     for path in paths:
         notebook = nbformat.read(path, as_version=4)
         nbformat.validate(notebook)
+        assert "LEARNING_PROGRESS.md" in notebook.cells[0].source
+        assert "当前个人进度仍为 Day 5" not in notebook.cells[0].source
         for cell in notebook.cells:
             if cell.cell_type == "code":
                 compile(cell.source, path, "exec")
