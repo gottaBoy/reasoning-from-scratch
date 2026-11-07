@@ -2,6 +2,8 @@
 
 当前学习位置：[Day 8，学习中](LEARNING_PROGRESS.md)。
 今日行动与个人验收见 [Day 8学习记录](DAY08_STUDY_LOG.md)。
+Day 9–30按相同形式展开的22份教程见 [详细课程总入口](COURSE_DAY09_30_DETAILS.md)，
+每课含图解、计算/数据契约、Jupyter步骤、调试优化、自测答案和一手资料。
 以下是学习材料，不是已通过的能力证书。
 跨天模拟面试、场景题与自评分见 [面试训练](INTERVIEW_PRACTICE.md)。
 按五个工程方向继续实践见 [推理优化与工程路线](INFERENCE_ENGINEERING_PATH.md)。

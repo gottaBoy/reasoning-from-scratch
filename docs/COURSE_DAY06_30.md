@@ -7,6 +7,8 @@
 所有天的原理、公式、误区、面试问答见 [每日关键知识](KNOWLEDGE_INDEX.md)。
 五方向的实践顺序与未完成的部署边界见 [推理工程路线](INFERENCE_ENGINEERING_PATH.md)。
 Day 17 可补做 [Triton IR实验](TRITON_IR.md)，不替代原来的数值/性能测试。
+Day 9–30现在各有一份 [详细教程](COURSE_DAY09_30_DETAILS.md)，
+原Notebook增补图解和自测参考答案，不重建原代码/输出/个人记录。
 
 ## 每日入口
 

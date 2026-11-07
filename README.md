@@ -52,6 +52,8 @@ git clone --depth 1 https://github.com/rasbt/reasoning-from-scratch.git
 > [30-day knowledge guide](docs/KNOWLEDGE_INDEX.md).
 > Symbols, configuration aliases, and tensor axes are defined in the
 > [course notation guide](docs/NOTATION.md).
+> Detailed Day 9–30 explanations, experiments, debugging steps, and reference answers:
+> [remaining lesson guide](docs/COURSE_DAY09_30_DETAILS.md).
 
 <br>
 <br>

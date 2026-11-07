@@ -23,6 +23,9 @@
 [进度记录](docs/LEARNING_PROGRESS.md)和[Day 8学习记录](docs/DAY08_STUDY_LOG.md)。
 材料自动准备不改变个人完成状态；旧的 Day 2 启动清单保留作复习。
 后续参考实现、每日 Notebook 和验证入口见 [Day 6–30 课程](docs/COURSE_DAY06_30.md)。
+**Day 9–30全部22份详细教程**见 [逐日图解与实验总表](docs/COURSE_DAY09_30_DETAILS.md)，
+已按图解、数字例子、源码/Jupyter、调试优化、自测答案与资料展开。
+材料全部备齐不表示后续已经学完，当前进度仍为Day 8。
 **每日知识点、概念、公式、误区、面试主问/追问与掌握标准**见
 [30 天知识与面试索引](docs/KNOWLEDGE_INDEX.md)，覆盖 Day 1–30。
 公式中的字母、张量轴和配置名称统一查阅

@@ -6,6 +6,9 @@
 [今日学习记录](../docs/DAY08_STUDY_LOG.md)。材料准备完成不代表个人验收通过。
 先看 [每日关键知识与面试索引](../docs/KNOWLEDGE_INDEX.md) 和
 [Day 6–30 可执行课程](../docs/COURSE_DAY06_30.md)。
+Day 9–30的详细教程、实验入口和个人记录模板见
+[剩余22课详细总表](../docs/COURSE_DAY09_30_DETAILS.md)；
+现有Notebook已补充图解与参考答案，不替换原有代码或个人验收记录。
 遇到 `B/H/T/D`、Q/K/V或不同源码的同名字母时，统一查
 [符号与张量形状规范](../docs/NOTATION.md)。
 

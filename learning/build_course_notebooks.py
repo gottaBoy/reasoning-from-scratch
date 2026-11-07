@@ -6,6 +6,7 @@ from pathlib import Path
 import nbformat
 
 from learning.curriculum import LESSONS
+from learning.course_guides import GUIDES, attach_guide
 
 
 def build(directory):
@@ -68,6 +69,8 @@ def build(directory):
             metadata={"kernelspec": {"name": "python3", "display_name": "Python 3 (ipykernel)",
                                      "language": "python"}},
         )
+        if day in GUIDES:
+            attach_guide(nb, day, Path(__file__).resolve().parents[1] / "docs")
         nbformat.write(nb, path)
         paths.append(str(path))
     return paths

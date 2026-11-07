@@ -17,6 +17,7 @@
 | 补充MLA代数实验后的普通测试 | **282 passed / 27 skipped / 1 warning** | 新增 8 项展开/吸收对齐、状态计数与非法维度测试 |
 | 补充Day 7调度与真实页池后的普通测试 | **301 passed / 27 skipped / 1 warning** | 现有Spark工作区使用缓存MATH-500数据重跑；19项Day 7测试 |
 | 补充Day 8 RMSNorm/RoPE后的普通测试 | **319 passed / 27 skipped / 1 warning** | 新增18项CPU数值契约测试；现有Spark缓存数据完整回归 |
+| 准备并验证Day 9–30详细教程后的普通测试 | **347 passed / 27 skipped / 1 warning** | 22份逐日Notebook图解/答案，21项参考实验通过，Day 22未配置服务 |
 | CUDA C++ 独立程序 | Vector Add / Shared Memory Reduction 通过 | 6 组输入大小，宿主机 nvcc 编译 |
 | Python/Ruff | 通过 | Notebook 路径初始化的 E402 单独排除，其他检查保留 |
 | Notebook schema/代码 | 生成器和执行检查通过 | 25 份新文件，不含未执行的个人练习答案 |
@@ -318,6 +319,40 @@ KV Cache Manager、Attention Kernel及存储、调用、优化步骤。
 
 本次CPU验证不等于GPU低精度性能或完整模型训练质量验证。
 参考实现与答案不代替学习者独立实现；个人验收仍待填写。
+
+## Day 9–30逐日详细教程准备与执行
+
+2026-11-07 UTC，用户要求把剩余课程全部按Day 5–8的方式准备。
+新增 [Day 9–30详细总入口](COURSE_DAY09_30_DETAILS.md)与22份逐日讲义，
+每份包含图解/数字例子、概念与计算契约、Jupyter/源码路线、调试与优化步骤、
+至少4个自测参考答案、一手资料与限制。
+
+现有 `day09_course.ipynb` 至 `day30_course.ipynb` 各新增两个明确管理的Markdown单元格：
+图解入口与自测参考答案；原有代码单元格、输出、cell ID和个人记录内容不被覆盖。
+`learning/course_guides.py`负责按固定章节校验、预览、备份和幂等更新；
+生成器也会在未来创建新课程时附加对应教程。`verify_course.py`新增`--days`选择与
+旧分日报告备份，默认仍执行Day 6–30全量，避免重复覆盖既有证据。
+
+执行：
+
+- Day 9–30共22份Notebook均执行到结束；状态为21 `passed`、Day 22
+  `external_service_not_configured`，没有真实vLLM服务时不伪报通过。
+- 每份Notebook的代码/格式和新讲义的本地链接检查通过；全部37份学习Notebook
+  schema/代码语法通过，22份原有代码/输出/ID保持不变。
+- 逐日执行目录（使用新目录，旧报告复制到`prior-reports`）：
+
+```text
+/workspace/logs/day09-30-detailed-20261107T180100Z/summary.json
+```
+
+- 该目录包含22个执行Notebook、22个本次分日报告和22个历史报告备份。
+- 全仓库普通回归（缓存数据、`SKIP_EXPENSIVE=1`、`RUN_REAL_DOWNLOAD_TESTS=0`）：
+  **347 passed / 27 skipped / 1 warning**，保留GB10 capability提示。
+- 测试工具新增54项课程教程/生成器/报告选择保护测试，Ruff、空白和本地链接通过。
+
+本次确认的是教程可执行性与参考实现状态，不等于个人已完成Day 9–30。
+Day 22没有服务、Day 15/16依赖实际CUDA binary、Day 17–21依赖GPU；
+不满足依赖的结果按明确状态记录。教程不承诺生产vLLM、长训练、量化、多卡或压测。
 
 ## 原始记录
 
