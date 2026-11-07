@@ -2,8 +2,8 @@
 
 这里保存 30 天学习过程中的可复现实验和小型实现。
 
-**当前学习位置：Day 7，学习中。** 见 [进度记录](../docs/LEARNING_PROGRESS.md)、
-[今日学习记录](../docs/DAY07_STUDY_LOG.md)。材料准备完成不代表个人验收通过。
+**当前学习位置：Day 8，学习中。** 见 [进度记录](../docs/LEARNING_PROGRESS.md)、
+[今日学习记录](../docs/DAY08_STUDY_LOG.md)。材料准备完成不代表个人验收通过。
 先看 [每日关键知识与面试索引](../docs/KNOWLEDGE_INDEX.md) 和
 [Day 6–30 可执行课程](../docs/COURSE_DAY06_30.md)。
 遇到 `B/H/T/D`、Q/K/V或不同源码的同名字母时，统一查
@@ -23,6 +23,7 @@
 | Day 6 手算与验证 | `day06_online_softmax.ipynb`、`day06_course.ipynb` |
 | Day 7 调度与分页 | [讲义](../docs/DAY07_SCHEDULER_MAP.md)、`day07_vllm_map.ipynb`、`day07_course.ipynb` |
 | Day 7 存储与生命周期 | [抽屉图解](../docs/DAY07_KV_LIFECYCLE.md)、`day07_kv_lifecycle.ipynb`、`day07_memory.py` |
+| Day 8 RMSNorm/RoPE | [讲义](../docs/DAY08_RMSNORM_ROPE.md)、`day08_rmsnorm_rope.ipynb`、`day08_course.ipynb` |
 | Day 17 编译IR | `day17_triton_ir.ipynb`、`triton_ir.py` |
 
 ## 已准备的后续目录

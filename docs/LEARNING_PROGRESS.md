@@ -1,31 +1,38 @@
 # 学习进度
 
-用户确认的当前学习位置：**Day 7：请求生命周期与调度地图**。
-更新时间：2026-11-07（America/Los_Angeles）。用户要求完善Day 6教程并继续下一天。
+用户确认的当前学习位置：**Day 8：RMSNorm 与 RoPE 独立实现**。
+更新时间：2026-11-07（America/New_York）。用户要求提交Day 7并继续下一天。
 
 | 维度 | 状态 |
 | --- | --- |
-| 学习位置 | Day 7，学习中 |
+| 学习位置 | Day 8，学习中 |
 | Day 1–4 | 已讲解并准备/验证实验，个人自测结果仍由学习者填写 |
 | Day 5 | 已完成本轮讲解，用户决定进入下一天；个人独立自测结果尚未登记 |
 | Day 6 | 本轮讲解与教程补充收尾，用户决定进入下一天；个人独立验收尚未登记 |
-| Day 7 | 已开始；按请求状态、调度轨迹、分页映射顺序学习，个人验收待填写 |
-| Day 8–30 | 后续材料已准备，尚未登记个人验收；参考实验结果见验证记录，Day 22 外部服务未配置 |
+| Day 7 | 本轮教程与实验已完成准备，个人独立验收尚未登记 |
+| Day 8 | 已开始；按RMSNorm、RoPE、offset和边界测试顺序学习 |
+| Day 9–30 | 后续材料已准备，尚未登记个人验收；参考实验结果见验证记录，Day 22 外部服务未配置 |
 | 掌握程度 | 不因助手写完参考答案或测试通过而自动提升 |
 
-此前已按用户要求自动准备后续材料；2026-11-07用户先后明确推进到Day 6、Day 7，
+此前已按用户要求自动准备后续材料；2026-11-07用户先后明确推进到Day 6、Day 7、Day 8，
 不是仅因材料准备或参考实验通过而自动推进。先预测，再执行，再记录自己的结果。
 执行入口和实际覆盖范围见 [后续课程](COURSE_DAY06_30.md)。
 每天的知识点与面试主问/追问见 [知识索引](KNOWLEDGE_INDEX.md)，
 测试与执行证据见 [验证记录](COURSE_VALIDATION.md)。
 
-## Day 7 起步
+## Day 8 起步
 
-今日记录：[Day 7学习记录](DAY07_STUDY_LOG.md)。
-先读 [请求生命周期与调度地图](DAY07_SCHEDULER_MAP.md)，再打开
-[Day 7交互式Notebook](../learning/day07_vllm_map.ipynb)，
-观察A/B/C请求在sequential/static/continuous三种策略下的轨迹。
-本日使用CPU模拟，不部署真实vLLM，不将round换算为GPU性能。
+今日记录：[Day 8学习记录](DAY08_STUDY_LOG.md)。
+先读 [RMSNorm与RoPE教程](DAY08_RMSNORM_ROPE.md)，再运行
+[逐步Notebook](../learning/day08_rmsnorm_rope.ipynb)。
+重点是独立实现契约、边界输入、offset和误差，不加载Qwen3，不以文本输出评价正确性。
+
+## Day 7 学习回顾
+
+Day 7记录：[Day 7学习记录](DAY07_STUDY_LOG.md)和
+[四角色、存储与生命周期图解](DAY07_KV_LIFECYCLE.md)。
+已补充抽屉账本、真实CPU小模型调用、异常回收和官方深入链接；
+个人独立口述和性能验收仍由学习者填写。
 调度图看完后继续 [四个角色、抽屉结构与生命周期](DAY07_KV_LIFECYCLE.md) 和
 [真实CPU页池/小模型实验](../learning/day07_kv_lifecycle.ipynb)。
 新增实际KV写入、非连续页复用与异常回收，仍不代表生产PagedAttention或GPU性能验证。

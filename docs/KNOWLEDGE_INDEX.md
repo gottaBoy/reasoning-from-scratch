@@ -1,7 +1,7 @@
 # 每日关键知识与面试索引
 
-当前学习位置：[Day 7，学习中](LEARNING_PROGRESS.md)。
-今日行动与个人验收见 [Day 7学习记录](DAY07_STUDY_LOG.md)。
+当前学习位置：[Day 8，学习中](LEARNING_PROGRESS.md)。
+今日行动与个人验收见 [Day 8学习记录](DAY08_STUDY_LOG.md)。
 以下是学习材料，不是已通过的能力证书。
 跨天模拟面试、场景题与自评分见 [面试训练](INTERVIEW_PRACTICE.md)。
 按五个工程方向继续实践见 [推理优化与工程路线](INFERENCE_ENGINEERING_PATH.md)。

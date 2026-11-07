@@ -1,8 +1,8 @@
 # Day 6–30 可执行课程
 
 当前学习位置统一见 [进度记录](LEARNING_PROGRESS.md)，不在各课程副本中固定学习日。
-当前行动入口见 [Day 7学习记录](DAY07_STUDY_LOG.md)，Day 6收尾见
-[Day 6学习记录](DAY06_STUDY_LOG.md)。
+当前行动入口见 [Day 8学习记录](DAY08_STUDY_LOG.md)；Day 7记录见
+[Day 7学习记录](DAY07_STUDY_LOG.md)。
 本页记录后续材料与参考实验已经准备，不能代替个人理解或面试验收。
 所有天的原理、公式、误区、面试问答见 [每日关键知识](KNOWLEDGE_INDEX.md)。
 五方向的实践顺序与未完成的部署边界见 [推理工程路线](INFERENCE_ENGINEERING_PATH.md)。

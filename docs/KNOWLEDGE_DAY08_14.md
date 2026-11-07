@@ -14,6 +14,11 @@
 **实验**：固定随机输入，对齐仓库 RMSNorm/RoPE；offset=0/5、
 非整齐 T、偶数 D，并检查不同 token 各自的位置。
 入口：`day08_course.ipynb`。
+初次学习先看 [Day 8逐步图解](DAY08_RMSNORM_ROPE.md) 和
+[RMSNorm/RoPE手算Notebook](../learning/day08_rmsnorm_rope.ipynb)，
+在 [学习记录](DAY08_STUDY_LOG.md) 写下自己的预测与独立实现证据。
+Mini RMSNorm内部是FP32，FP64输入不自动升级它的归约精度；
+RoPE固定split-halves布局，D=4配对为(0,2)/(1,3)。
 
 **面试主问**：FP16 做方差/均方值有什么风险？
 **答案要点**：动态范围与累积精度受限，平方/求和可能溢出或误差放大，

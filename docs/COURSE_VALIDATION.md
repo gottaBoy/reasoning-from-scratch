@@ -16,6 +16,7 @@
 | 补充Triton IR后的普通测试 | **274 passed / 27 skipped / 1 warning** | 新增 5 项导出/CPU拒绝/真实GPU编译产物测试 |
 | 补充MLA代数实验后的普通测试 | **282 passed / 27 skipped / 1 warning** | 新增 8 项展开/吸收对齐、状态计数与非法维度测试 |
 | 补充Day 7调度与真实页池后的普通测试 | **301 passed / 27 skipped / 1 warning** | 现有Spark工作区使用缓存MATH-500数据重跑；19项Day 7测试 |
+| 补充Day 8 RMSNorm/RoPE后的普通测试 | **319 passed / 27 skipped / 1 warning** | 新增18项CPU数值契约测试；现有Spark缓存数据完整回归 |
 | CUDA C++ 独立程序 | Vector Add / Shared Memory Reduction 通过 | 6 组输入大小，宿主机 nvcc 编译 |
 | Python/Ruff | 通过 | Notebook 路径初始化的 E402 单独排除，其他检查保留 |
 | Notebook schema/代码 | 生成器和执行检查通过 | 25 份新文件，不含未执行的个人练习答案 |
@@ -284,6 +285,40 @@ KV Cache Manager、Attention Kernel及存储、调用、优化步骤。
 数据大小是CPU数组计数；教学句柄防越界不等于安全擦除或原始storage访问隔离。
 官方深入阅读链接按Cache、vLLM架构、分页、Triton kernel、调优排序收录在图解中。
 
+## Day 8启动与RMSNorm/RoPE验证
+
+2026-11-07（America/New_York），用户要求提交Day 7并继续下一天。
+此前Day 5–7内容已提交为 `6f326bc`；当前进度更新为Day 8学习中。
+新增 [Day 8逐步图解](DAY08_RMSNORM_ROPE.md)、
+[学习记录](DAY08_STUDY_LOG.md)和[Notebook](../learning/day08_rmsnorm_rope.ipynb)，
+没有修改现有Mini Transformer或Qwen3模型实现。
+
+- 在现有Spark Jupyter完整执行新Notebook的7个代码单元格。
+- `[3,4]`的FP64公式输出约 `[0.8485281035,1.1313708046]`；
+  Mini内部FP32结果最大绝对误差约 `2.18e-8`，未把FP64输入误当FP64算法。
+- 全零、常数、较大/较小值，非全1的gamma；
+  FP32/FP16/BF16分别与实际输入值的FP64公式、仓库及PyTorch参考核对，
+  输出有限、dtype保留，输入和gamma梯度存在且有限。
+- RoPE固定split-halves配对与theta_base=10000，对齐offset=0/5，
+  检查位置0不旋转、每头二范数保持、整段/正确offset分块一致；
+  错误重置offset、奇数D与负offset均有负例。
+- 对固定内容q/k，同位置差的旋转点积在容差内对齐；
+  不把该性质推广成不同token之间分数必定相同。
+- 新增18项Day 8测试；连同现有课程/工具测试共 **62 passed**。
+- 全部37份学习Notebook的schema与代码语法、Ruff、本地链接和空白检查通过。
+- 使用现有Spark工作区缓存数据完整回归：
+  **319 passed / 27 skipped / 1 warning**，25.53秒；
+  保留PyTorch GB10 capability提示，未跳过失败项或关闭TLS。
+
+已执行Notebook：
+
+```text
+/workspace/logs/day08-rmsnorm-rope-executed-20261107T171419116742Z.ipynb
+```
+
+本次CPU验证不等于GPU低精度性能或完整模型训练质量验证。
+参考实现与答案不代替学习者独立实现；个人验收仍待填写。
+
 ## 原始记录
 
 已执行 Notebook 和分日实验报告保存在现有 volume 中，不加入 Git：
@@ -336,5 +371,5 @@ SKIP_EXPENSIVE=1 RUN_REAL_DOWNLOAD_TESTS=0 python -m pytest -q tests
 - 没有执行本月全部长训练、量化、多卡、多节点或正式大规模服务压测。
 
 材料已具备可复现的学习与面试训练入口；当前行动见
-[学习进度](LEARNING_PROGRESS.md) 与 [Day 7学习记录](DAY07_STUDY_LOG.md)，
+[学习进度](LEARNING_PROGRESS.md) 与 [Day 8学习记录](DAY08_STUDY_LOG.md)，
 历史参考实验通过不自动替代个人验收。
