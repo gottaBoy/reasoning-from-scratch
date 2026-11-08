@@ -1,7 +1,9 @@
 # Day 8学习记录：RMSNorm与RoPE独立实现
 
 开始日期：2026-11-07（America/New_York）。
-状态：**学习中**。用户要求提交Day 7后继续下一天。
+状态：**概念阅读已由用户确认完成，独立实现转入P1-01本地实战**。
+当前任务见 [实战教程](LOCAL_PRACTICE.md) 与 [实战日志](LOCAL_PRACTICE_LOG.md)，
+本页参考验证不自动替代个人实现验收。
 当前学习位置见 [进度记录](LEARNING_PROGRESS.md)。
 
 ## 今日核心问题

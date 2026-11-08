@@ -54,6 +54,7 @@ git clone --depth 1 https://github.com/rasbt/reasoning-from-scratch.git
 > [course notation guide](docs/NOTATION.md).
 > Detailed Day 9–30 explanations, experiments, debugging steps, and reference answers:
 > [remaining lesson guide](docs/COURSE_DAY09_30_DETAILS.md).
+> After the concepts: [local practice loop and implementation acceptance](docs/LOCAL_PRACTICE.md).
 
 <br>
 <br>

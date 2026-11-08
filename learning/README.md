@@ -2,8 +2,10 @@
 
 这里保存 30 天学习过程中的可复现实验和小型实现。
 
-**当前学习位置：Day 8，学习中。** 见 [进度记录](../docs/LEARNING_PROGRESS.md)、
-[今日学习记录](../docs/DAY08_STUDY_LOG.md)。材料准备完成不代表个人验收通过。
+**当前阶段：概念阅读完成，进入本地实战P1-01。**
+先打开 [实战Notebook](practice01_start.ipynb)，按 [反复练习教程](../docs/LOCAL_PRACTICE.md)
+写自己的代码，再用 `python -m learning.local_practice --candidate learning/my_ops.py` 验收。
+见 [进度](../docs/LEARNING_PROGRESS.md) 和 [实战日志](../docs/LOCAL_PRACTICE_LOG.md)。
 先看 [每日关键知识与面试索引](../docs/KNOWLEDGE_INDEX.md) 和
 [Day 6–30 可执行课程](../docs/COURSE_DAY06_30.md)。
 Day 9–30的详细教程、实验入口和个人记录模板见
@@ -16,6 +18,7 @@ Day 9–30的详细教程、实验入口和个人记录模板见
 
 | 阶段 | 入口 |
 | --- | --- |
+| 本地实战P1-01 | `practice01_start.ipynb`、`local_practice.py`；CPU先对齐，之后明确请求CUDA |
 | Day 3 | `day03_debug.ipynb`、`day03_shapes.py` |
 | Day 3 RoPE/SwiGLU | `day03_rope_swiglu.ipynb` |
 | Day 4 | `day04_kv_cache.ipynb`、`day04_cache.py` |

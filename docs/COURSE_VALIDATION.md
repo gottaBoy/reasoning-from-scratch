@@ -18,6 +18,7 @@
 | 补充Day 7调度与真实页池后的普通测试 | **301 passed / 27 skipped / 1 warning** | 现有Spark工作区使用缓存MATH-500数据重跑；19项Day 7测试 |
 | 补充Day 8 RMSNorm/RoPE后的普通测试 | **319 passed / 27 skipped / 1 warning** | 新增18项CPU数值契约测试；现有Spark缓存数据完整回归 |
 | 准备并验证Day 9–30详细教程后的普通测试 | **347 passed / 27 skipped / 1 warning** | 22份逐日Notebook图解/答案，21项参考实验通过，Day 22未配置服务 |
+| 本地实战P1-01验收工具后的普通测试 | **355 passed / 27 skipped / 1 warning** | 新增8项验收器保护测试，参考CPU/CUDA均14项通过 |
 | CUDA C++ 独立程序 | Vector Add / Shared Memory Reduction 通过 | 6 组输入大小，宿主机 nvcc 编译 |
 | Python/Ruff | 通过 | Notebook 路径初始化的 E402 单独排除，其他检查保留 |
 | Notebook schema/代码 | 生成器和执行检查通过 | 25 份新文件，不含未执行的个人练习答案 |
@@ -356,6 +357,30 @@ KV Cache Manager、Attention Kernel及存储、调用、优化步骤。
 Day 22没有服务、Day 15/16依赖实际CUDA binary、Day 17–21依赖GPU；
 不满足依赖的结果按明确状态记录。教程不承诺生产vLLM、长训练、量化、多卡或压测。
 
+## 本地实战P1-01启动与验收器
+
+2026-11-08（America/New_York），用户确认概念课程全部阅读，要求提交代码并开始
+可反复练习的本地实战。新增 [21关实战路线](LOCAL_PRACTICE.md)、
+[个人实战日志](LOCAL_PRACTICE_LOG.md)、`learning/local_practice.py`
+和 [P1-01 Notebook](../learning/practice01_start.ipynb)。
+
+- 验收器默认reference_baseline；传可信本地candidate文件后才加载该文件，
+  记录source路径、SHA-256与每个case结果，不宣称能证明独立作者身份。
+- 实际Spark自检：CUDA MatMul、BF16 Attention前后向通过，
+  PyTorch 2.10.0+cu130、NVIDIA GB10，保留capability提示。
+- P1-01参考CPU与CUDA均14/14通过，覆盖Norm边界/gamma/行隔离/有限梯度、
+  RoPE的offset/分块/范数保持与非法参数拒绝。
+- 新增8项验收器测试：真实candidate加载、故意错误实现被检出、
+  显式CUDA不fallback、接口错误、报告不覆盖、CLI错误状态与非零退出码。
+- 新Notebook在现有Jupyter完整执行3个代码单元格；
+  全部38份学习Notebook schema/语法、Ruff、本地链接及空白检查通过。
+- 现有Spark缓存数据完整普通回归：
+  **355 passed / 27 skipped / 1 warning**，31.77秒。
+
+原始Notebook及CPU/CUDA报告路径见 [实战日志](LOCAL_PRACTICE_LOG.md)。
+没有替用户写好my_ops.py或登记个人验收，也没有性能加速、训练质量、
+新服务部署或后续关卡全部独立实现的结论。
+
 ## 原始记录
 
 已执行 Notebook 和分日实验报告保存在现有 volume 中，不加入 Git：
@@ -408,5 +433,5 @@ SKIP_EXPENSIVE=1 RUN_REAL_DOWNLOAD_TESTS=0 python -m pytest -q tests
 - 没有执行本月全部长训练、量化、多卡、多节点或正式大规模服务压测。
 
 材料已具备可复现的学习与面试训练入口；当前行动见
-[学习进度](LEARNING_PROGRESS.md) 与 [Day 8学习记录](DAY08_STUDY_LOG.md)，
+[学习进度](LEARNING_PROGRESS.md) 与 [本地实战日志](LOCAL_PRACTICE_LOG.md)，
 历史参考实验通过不自动替代个人验收。
