@@ -49,6 +49,8 @@ GPU验证把最后的cpu改为cuda即可。CUDA不可用会明确失败，保留
 ## 3. P1-01：今天你真正要写的代码
 
 在当前工作区编写 `learning/my_ops.py`，导出以下两个接口：
+实现思路和每个TODO的中文说明见 [my_ops实现指导](MY_OPS_IMPLEMENTATION.md)，
+另有 [注释模板](../learning/my_ops_template.py)，不会覆盖你已有的my_ops.py。
 
 | 接口 | 输入/输出契约 |
 | --- | --- |
@@ -56,6 +58,8 @@ GPU验证把最后的cpu改为cuda即可。CUDA不可用会明确失败，保留
 | `rope(x, start=0, theta=10000.0)` | `[B,H,T,D]`，split-halves配对、保持shape/dtype/device；奇数D、负start抛ValueError |
 
 第一版支持FP32，内部归约先按FP32；不要直接调用参考实现冒充独立实现。
+RMSNorm不会推导时先看 [目标→公式→代码的逐步推导](DAY08_RMSNORM_ROPE.md#rmsnorm-derivation)，
+其中附原论文、PyTorch官方API与rsqrt链接，以及RMS归一化和L2归一化的区别。
 验收器能确认文件被加载和本次数值通过，不能证明作者是否独立编写。
 只加载你信任的本地文件，candidate导入会执行该文件里的Python代码。
 

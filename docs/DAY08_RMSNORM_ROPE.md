@@ -25,54 +25,166 @@ RMS读“均方根”；gamma是希腊字母γ，eps对应epsilon/ε。
 
 ## 2. RMSNorm：给每一行信号调音量
 
-假设一个位置的隐藏向量为：
+<a id="rmsnorm-derivation"></a>
+
+### 2.1 推导目标：调节整体尺度，不是把每个数都变成1
+
+下面推导前向计算。只看一个位置的隐藏向量：
+
+$$
+x=[x_1,x_2,\ldots,x_E]
+$$
+
+E是这一行的特征数。对 `[B,T,E]`，本课只沿最后的E轴计算，
+不把其他token或Batch行一起求平均。
+如果在每个Attention head上做Norm，归一化宽度可为D；最终以该模块的轴定义为准。
+
+先忽略epsilon和可学习增益，对非零向量选择一个正的共同缩放系数c，
+让输出的均方根等于1。这是本节选择的归一化目标，不是所有归一化方法的唯一目标。
+
+### 2.2 从“平方、平均、开根号”得到RMS
+
+先平方，避免正负数直接求和时互相抵消；再平均，最后开根号：
+
+$$
+q=\frac{1}{E}\sum_{j=1}^{E}x_j^2,\qquad
+\operatorname{RMS}(x)=\sqrt{q}
+$$
+
+可以按下面的顺序读：
 
 ```text
-x = [3,4]
+每个分量平方 → 沿特征轴求平均 → 开平方 → 这一行的共同尺度
 ```
 
-平方均值：
+平方均值q不是方差：这里没有先减去均值。
 
-```text
-mean(x²) = (3²+4²)/2 = 12.5
-RMS(x) = sqrt(12.5) ≈ 3.5355
-```
+### 2.3 为什么要除以RMS：求出缩放系数c
 
-忽略可学习缩放 `gamma` 和极小的 `eps`：
+设归一化后的分量为 `x_hat_i=c*x_i`，要求：
 
-```text
-RMSNorm(x) = x / RMS(x)
-            ≈ [0.8485, 1.1314]
-```
+$$
+\frac{1}{E}\sum_{i=1}^{E}(c x_i)^2=1
+$$
 
-形象理解：
+把共同的c平方提到求和外面：
 
-```text
-原始声音：同一个人突然一会儿很大声、一会儿很小声
-RMSNorm：先把整体音量拉到稳定范围
-gamma：模型再决定每个频段应该放大或压低多少
-```
+$$
+c^2\frac{1}{E}\sum_{i=1}^{E}x_i^2=1
+$$
 
-“音量/频段”只是帮助理解尺度与通道，不代表隐藏特征真是音频频率。
-gamma可以不全为正，也不保证乘完后每行的均方根仍然等于1。
+取保持方向的正解：
 
-公式：
+$$
+c=\frac{1}{\sqrt{\frac{1}{E}\sum_{i=1}^{E}x_i^2}}
+=\frac{1}{\operatorname{RMS}(x)}
+$$
+
+因此：
+
+$$
+\hat{x}_i=\frac{x_i}{\operatorname{RMS}(x)}
+$$
+
+直觉就是“把整行音量按同一个旋钮调整”，不是每个分量分别除以自己。
+
+### 2.4 加上epsilon和gamma，得到实际公式
+
+零向量的RMS为0，不能直接做上面的除法；加上正的epsilon稳定分母。
+之后再给每个特征乘一个可学习增益gamma：
+
+$$
+\boxed{
+y_i=\gamma_i\,
+\frac{x_i}
+{\sqrt{\frac{1}{E}\sum_{j=1}^{E}x_j^2+\epsilon}}
+}
+$$
+
+对应向量形式：
 
 ```text
 RMSNorm(x) = gamma ⊙ x / sqrt(mean(x²) + eps)
 ```
 
-- `mean(x²)` 沿最后一个特征维度计算。
-- `gamma` shape 是 `[E]`，按特征广播到 `[B,T,E]`。
-- `eps` 防止输入全零或极小值时除零。
-- 常用 FP32 计算平方、求和和平方根，再转回原 dtype。
+| 符号 | 这里的职责 | 对应代码 |
+| --- | --- | --- |
+| E | 当前归一化行的特征数 | `x.shape[-1]` |
+| q | 沿特征轴的平方均值 | `x.square().mean(dim=-1, keepdim=True)` |
+| epsilon / ε | 分母稳定项 | 本课显式`eps=1e-6` |
+| gamma / γ | 每个特征的可学习增益 | 本课接口为`weight`，shape `[E]` |
+| ⊙ | 逐元素相乘 | `normalized * weight`，按特征广播 |
+
+加入eps后，即使gamma全为1，也不要求每行RMS严格等于1：
+
+$$
+\operatorname{RMS}(\hat{x})
+=\sqrt{\frac{q}{q+\epsilon}}
+$$
+
+q远大于eps时才接近1；全零输入仍输出0。乘不同gamma后更不保证单位RMS，
+gamma也不必全为正。这不是softmax，不要求每行和为1，更不保证零均值。
+
+### 2.5 用 `[3,4]` 手算，区分RMSNorm与L2归一化
+
+忽略eps，令gamma为 `[1,1]`：
+
+```text
+x = [3,4]
+平方均值 = (3²+4²)/2 = 12.5
+RMS = sqrt(12.5) ≈ 3.5355
+y ≈ [3/3.5355,4/3.5355] = [0.8485,1.1314]
+```
+
+为什么不是熟悉的 `[0.6,0.8]`？因为后者除的是L2长度5：
+
+$$
+\|x\|_2=\sqrt{\sum_i x_i^2},\qquad
+\operatorname{RMS}(x)=\frac{\|x\|_2}{\sqrt{E}}
+$$
+
+| 操作 | `[3,4]`的输出 | 被归一到1的量（忽略eps） |
+| --- | --- | --- |
+| L2归一化 | `[0.6,0.8]` | 向量二范数 |
+| RMS归一化，gamma=1 | `[0.8485,1.1314]` | 分量的均方根 |
+
+后者的二范数为sqrt(2)，不是1；归一化目标不同，不是哪一个算错了。
+
+### 2.6 公式怎样落到PyTorch代码
+
+以下对应本课程的FP32内部计算路径，不是声明所有实现都必须这样写：
+
+```python
+input_dtype = x.dtype
+x = x.float()
+mean_square = x.square().mean(dim=-1, keepdim=True)
+normalized = x * torch.rsqrt(mean_square + eps)
+y = (normalized * weight).to(input_dtype)
+```
+
+`rsqrt(a)`是 `1/sqrt(a)`，所以乘rsqrt等价于除以平方根。
+`keepdim=True`将 `[B,T,E]` 的平方均值保留为 `[B,T,1]`，方便给每个特征广播。
+weight应是注册的可学习参数，不是每次forward临时新建一份。
 
 本仓库Mini RMSNorm明确调用 `x.float()`；即使对模块执行 `.double()`，
 内部归约也仍是FP32。Notebook因此分别保留FP64手算oracle与FP32实现对齐，
 不会把1e-12的容差强加给FP32算法。FP64输入也不代表该实现提供FP64内部计算。
 `torch.nn.RMSNorm`的默认eps可能不同，比较时要显式统一 `eps=1e-6` 和gamma。
 
-### RMSNorm 与 LayerNorm 的区别
+### 2.7 对照源码与一手阅读链接
+
+建议按“本页推导 → 小例子 → API定义 → 原论文”的顺序阅读：
+
+- [PyTorch 2.10 RMSNorm：公式、normalized_shape、eps与可学习参数](https://docs.pytorch.org/docs/2.10/generated/torch.nn.RMSNorm.html)
+- [RMSNorm原论文：Zhang与Sennrich，2019](https://arxiv.org/abs/1910.07467)
+- [PyTorch 2.10 rsqrt：平方根的倒数](https://docs.pytorch.org/docs/2.10/generated/torch.rsqrt.html)
+- [本仓库Mini RMSNorm，`class RMSNorm`](../learning/mini_transformer/model.py)
+- [手算与边界Notebook](../learning/day08_rmsnorm_rope.ipynb)
+- [本地实战接口与CPU/CUDA验收](LOCAL_PRACTICE.md)
+
+本页是前向推导和教学实现说明，不等于完整反向公式推导或GPU性能证明。
+
+### 2.8 RMSNorm 与 LayerNorm 的区别
 
 ```text
 RMSNorm：  只看平方均值，不减均值
@@ -87,7 +199,7 @@ x = [10,11,12]
 
 RMSNorm 后仍然保留“整体偏正”的方向；LayerNorm 会先把均值移到0附近。
 
-### RMSNorm 的边界测试
+### 2.9 RMSNorm 的边界测试
 
 至少测试：
 
@@ -142,6 +254,69 @@ head dimension 为 `D` 时，有 `D/2` 个特征对，但要先看配对布局�
 更明确地写，频率 `omega_i=theta_base^(-2i/D)`，位置p的旋转角为
 `phi_{p,i}=p*omega_i`，i从0到D/2-1。**theta_base是频率基数，不是直接旋转的角度。**
 例如D=4、theta_base=10000，两对频率分别为1和0.01弧度/位置。
+
+<a id="rope-angle-layout"></a>
+
+### 3.1 “按theta旋转”不是与split-halves并列的另一种RoPE
+
+这里有三个不同问题，分开理解就不会混：
+
+| 问题 | 决定什么 | 示例 |
+| --- | --- | --- |
+| 配对布局 | 哪两个特征组成一个二维向量 | split-halves或interleaved |
+| 位置与频率 | 这一对转多少角度phi | `phi = position * frequency` |
+| 计算写法 | 怎样算出旋转后的值 | sin/cos公式、旋转矩阵或复数乘法 |
+
+**两种配对布局都做角度旋转**，不是split-halves不旋转、另一种才旋转。
+对选定的一对特征 `(a,b)`，统一计算为：
+
+$$
+\begin{bmatrix}a'\\b'\end{bmatrix}
+=
+\begin{bmatrix}
+\cos\phi&-\sin\phi\\
+\sin\phi&\cos\phi
+\end{bmatrix}
+\begin{bmatrix}a\\b\end{bmatrix}
+$$
+
+展开就是 `a'=a*cos(phi)-b*sin(phi)`、
+`b'=a*sin(phi)+b*cos(phi)`。
+如果把同一对写成复数 `z=a+ib`，也可写 `z'=z*exp(i*phi)`；
+Llama官方实现用复数乘法完成这一计算。
+矩阵、三角函数和复数是计算表达方式，不是可以不核对布局就混用的三套权重格式。
+
+### 3.2 代码参数theta是基数，真正的旋转角是phi
+
+本模板接口为 `rope(x, start=0, theta=10000.0)`。
+这里保留theta这个常见参数名，但它表示频率基数theta_base，不是直接给每一对转10000弧度。
+为避免同名字母混用，文中用omega表示频率，用phi表示角度：
+
+$$
+\omega_i=\mathrm{theta\_base}^{-2i/D},\qquad
+\phi_{p,i}=p\,\omega_i,\qquad i=0,\ldots,D/2-1
+$$
+
+这是本页标准RoPE配置，位置角按弧度计。举例：
+
+```text
+D=4，theta_base=10000，位置p=2
+第0对：omega_0=10000^0=1    → phi=2*1=2弧度
+第1对：omega_1=10000^-0.5=0.01 → phi=2*0.01=0.02弧度
+```
+
+split-halves时，两角分别作用于 `(x0,x2)`、`(x1,x3)`；
+interleaved时则分别作用于 `(x0,x1)`、`(x2,x3)`。
+直接对同一原始排列使用不同配对，数值一般不同；
+若要表达同一个映射，必须同时保持特征排列与对应投影权重的转换一致。
+
+记忆：**配对方式决定谁和谁一起转；位置与频率决定转多少；矩阵/复数决定怎样写计算。**
+长上下文缩放或其他模型变体可能进一步改频率/位置规则，仍以目标实现为准。
+
+一手链接：
+[RoFormer原论文](https://arxiv.org/abs/2104.09864)、
+[Llama 3官方代码中的precompute_freqs_cis与apply_rotary_emb](https://github.com/meta-llama/llama3/blob/main/llama/model.py)、
+[本仓库split-halves与interleaved示意](../reasoning_from_scratch/qwen3.py)。
 
 **在本课程架构里，RoPE只作用于Q/K，不作用于V。**
 
