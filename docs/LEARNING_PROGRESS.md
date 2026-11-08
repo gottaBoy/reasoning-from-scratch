@@ -23,6 +23,17 @@
 [Day 9–30逐日教程](COURSE_DAY09_30_DETAILS.md)。
 准备和助手验证不自动推进当前Day 8，不自动勾选后续个人验收。
 
+## 剩余课程准备与提交记录
+
+- 教程主体提交：`149d7f2 Prepare detailed Day 9-30 learning guides`，已推送到`origin/main`。
+- 范围：Day 9–30共22份详细教程，配套Notebook补充图解和自测参考答案；
+  原代码、输出、单元格ID和个人记录保留，并已同步到现有Spark Jupyter。
+- 参考执行：22份Notebook均执行结束，21项实验通过；
+  Day 22为`external_service_not_configured`，不计通过。
+- 最近普通回归：`347 passed / 27 skipped / 1 warning`；
+  GB10提示保留，测试与执行记录详见 [验证报告](COURSE_VALIDATION.md)。
+- 本次补记不重复执行全部实验，也不改变个人Day 8学习位置或后续验收状态。
+
 ## Day 8 起步
 
 今日记录：[Day 8学习记录](DAY08_STUDY_LOG.md)。

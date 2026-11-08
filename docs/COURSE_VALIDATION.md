@@ -348,7 +348,9 @@ KV Cache Manager、Attention Kernel及存储、调用、优化步骤。
 - 该目录包含22个执行Notebook、22个本次分日报告和22个历史报告备份。
 - 全仓库普通回归（缓存数据、`SKIP_EXPENSIVE=1`、`RUN_REAL_DOWNLOAD_TESTS=0`）：
   **347 passed / 27 skipped / 1 warning**，保留GB10 capability提示。
-- 测试工具新增54项课程教程/生成器/报告选择保护测试，Ruff、空白和本地链接通过。
+- 新增28项课程教程/生成器/报告选择保护测试；
+  连同28项原有课程工具测试共56项专项测试通过。
+  Ruff、空白和本地链接检查通过。
 
 本次确认的是教程可执行性与参考实现状态，不等于个人已完成Day 9–30。
 Day 22没有服务、Day 15/16依赖实际CUDA binary、Day 17–21依赖GPU；
