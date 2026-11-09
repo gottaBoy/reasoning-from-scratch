@@ -1,8 +1,9 @@
-"""P1-01 acceptance runner: reference baseline or a trusted local learner module."""
+"""Local practice acceptance: reference baselines or trusted learner modules."""
 
 import argparse
 from datetime import datetime, timezone
 import hashlib
+import importlib
 import importlib.util
 import json
 from pathlib import Path
@@ -10,9 +11,10 @@ from pathlib import Path
 import torch
 
 
-def _implementation(candidate):
+def _implementation(candidate, exports=("RMSNorm", "rope"),
+                    reference_module="learning.mini_transformer.model"):
     if candidate is None:
-        from learning.mini_transformer import model as module
+        module = importlib.import_module(reference_module)
         role = "reference_baseline"
         source = Path(module.__file__).resolve()
     else:
@@ -23,8 +25,8 @@ def _implementation(candidate):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         role = "candidate_file"
-    if not callable(getattr(module, "RMSNorm", None)) or not callable(getattr(module, "rope", None)):
-        raise ValueError("Module must export RMSNorm(width, eps) and rope(x, start, theta).")
+    if any(not callable(getattr(module, name, None)) for name in exports):
+        raise ValueError("Module must export " + " and ".join(exports) + ".")
     return module, role, source
 
 
@@ -52,7 +54,7 @@ def _close(actual, expected, shape, device, atol=2e-6, rtol=1e-5):
     return {"max_absolute_error": (actual64 - expected64).abs().max().item()}
 
 
-def evaluate(device="cpu", candidate=None):
+def _resolve_device(device):
     device = torch.device(device)
     if device.type not in ("cpu", "cuda"):
         raise ValueError("This practice supports cpu or cuda.")
@@ -61,6 +63,11 @@ def evaluate(device="cpu", candidate=None):
             raise RuntimeError("CUDA explicitly requested but unavailable; no CPU fallback.")
         if device.index is None:
             device = torch.device("cuda", torch.cuda.current_device())
+    return device
+
+
+def evaluate(device="cpu", candidate=None):
+    device = _resolve_device(device)
     module, role, source = _implementation(candidate)
     cases = []
     generator = torch.Generator().manual_seed(123)
@@ -180,18 +187,24 @@ def write_report(report, path):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    parser.add_argument("--task", choices=("norm-rope", "attention"), default="norm-rope")
     parser.add_argument("--candidate", type=Path, help="Trusted standalone learner .py module.")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
+    practice = "P1-01" if args.task == "norm-rope" else "P1-02"
     output = args.output or Path("logs/practice") / (
-        "p1-01-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + ".json"
+        practice.lower() + "-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + ".json"
     )
     if output.exists():
         parser.error("Use a fresh report path; existing evidence will not be overwritten.")
     try:
-        report = evaluate(args.device, args.candidate)
+        if args.task == "attention":
+            from learning.practice_attention import evaluate_attention
+            report = evaluate_attention(args.device, args.candidate)
+        else:
+            report = evaluate(args.device, args.candidate)
     except Exception as error:
-        report = {"practice": "P1-01", "status": "error", "device": args.device,
+        report = {"practice": practice, "status": "error", "device": args.device,
                   "error": f"{type(error).__name__}: {error}"}
     write_report(report, output)
     print(json.dumps(report, indent=2, ensure_ascii=False))

@@ -19,6 +19,7 @@
 | 补充Day 8 RMSNorm/RoPE后的普通测试 | **319 passed / 27 skipped / 1 warning** | 新增18项CPU数值契约测试；现有Spark缓存数据完整回归 |
 | 准备并验证Day 9–30详细教程后的普通测试 | **347 passed / 27 skipped / 1 warning** | 22份逐日Notebook图解/答案，21项参考实验通过，Day 22未配置服务 |
 | 本地实战P1-01验收工具后的普通测试 | **355 passed / 27 skipped / 1 warning** | 新增8项验收器保护测试，参考CPU/CUDA均14项通过 |
+| 用户P1-01验收与P1-02入口后的普通测试 | **364 passed / 27 skipped / 1 warning** | 用户Norm/RoPE文件CPU/CUDA各14项通过；新Attention入口9项测试 |
 | CUDA C++ 独立程序 | Vector Add / Shared Memory Reduction 通过 | 6 组输入大小，宿主机 nvcc 编译 |
 | Python/Ruff | 通过 | Notebook 路径初始化的 E402 单独排除，其他检查保留 |
 | Notebook schema/代码 | 生成器和执行检查通过 | 25 份新文件，不含未执行的个人练习答案 |
@@ -380,6 +381,34 @@ Day 22没有服务、Day 15/16依赖实际CUDA binary、Day 17–21依赖GPU；
 原始Notebook及CPU/CUDA报告路径见 [实战日志](LOCAL_PRACTICE_LOG.md)。
 没有替用户写好my_ops.py或登记个人验收，也没有性能加速、训练质量、
 新服务部署或后续关卡全部独立实现的结论。
+
+## P1-01用户文件验收与P1-02单头Attention
+
+2026-11-08（America/Los_Angeles），用户继续本地实战。
+读取到 `learning/my_ops.py` 已有RMSNorm/RoPE实现，本次未修改、替换或自动提交用户文件。
+首次容器报candidate不存在，是named volume未同步；只复制该文件后重跑成功。
+
+- P1-01为 `candidate_file`，CPU/CUDA均14 passed、0 failed，
+  两份报告source_sha256一致：
+  `70b81c835cd769c7799595b9db44e051bae5b9df741fe4ea7174c2ec2af6bff9`。
+- 本结果为已定义FP32数值、边界、位置和有限梯度检查，不等于所有输入、
+  低精度、性能或独立创作证明。
+- 下一关新增 [P1-02教程](PRACTICE_P1_02_ATTENTION.md)、
+  [Notebook](../learning/practice02_attention.ipynb)、
+  `my_attention_template.py`与`practice_attention.py`；
+  用户自己的Attention实现仍待完成/指定。
+- `--task attention`加载causal_attention接口；不传task的旧命令仍执行P1-01。
+  reference baseline与candidate file明确区分，报告不会覆盖旧文件。
+- 新参考CPU/CUDA均14项通过：手算17.5、方形/矩形因果匹配、
+  未来K/V扰动、均匀权重、输入不修改、梯度与SDPA对齐及非法参数拒绝。
+- 新Notebook在现有Jupyter完整执行4个代码单元格；
+  新增9项Attention验收器保护/兼容性测试，含错误offset被检测及旧CLI默认行为不变。
+- 全仓库普通回归 **364 passed / 27 skipped / 1 warning**，33.18秒；
+  保留GB10提示，Ruff、Notebook schema/语法、本地链接与空白检查通过。
+
+用户P1-01与参考P1-02报告路径见 [实战日志](LOCAL_PRACTICE_LOG.md)。
+后者只是Attention核心，不含Q/K/V投影、RoPE、Cache分配、输出投影、生成、
+低精度或GPU性能验证；进入P1-02不自动登记为该关已通过。
 
 ## 原始记录
 

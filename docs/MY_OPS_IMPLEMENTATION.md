@@ -142,3 +142,5 @@ python -m learning.local_practice --device cuda --candidate learning/my_ops.py
 - [每关反复练习路线](LOCAL_PRACTICE.md)
 
 本模板说明接口与实现顺序，不是完整生产算子，也不自动证明独立实现或GPU性能。
+自己的RMSNorm/RoPE文件通过定义范围的CPU/CUDA验收后，继续
+[P1-02单头因果Attention](PRACTICE_P1_02_ATTENTION.md)，不要覆盖已完成的my_ops.py。

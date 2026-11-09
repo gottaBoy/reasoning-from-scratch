@@ -1,18 +1,20 @@
 # 学习进度
 
 用户确认：**概念课程已全部阅读，进入本地实战**。
-当前关卡：**P1-01：自写RMSNorm/RoPE的CPU与CUDA验收**（对应原Day 8实现内容）。
-更新时间：2026-11-08（America/New_York）。概念阅读完成为用户自述，独立实现与性能验收分别记录。
+当前关卡：**P1-02：单头因果Attention核心**（对应原Day 9的计算内容）。
+更新时间：2026-11-08（America/Los_Angeles）。
+用户的my_ops.py已通过P1-01支持范围的CPU/CUDA验收；概念阅读、代码验收与性能仍分别记录。
 
 | 维度 | 状态 |
 | --- | --- |
-| 学习位置 | 本地实战P1-01，学习中 |
+| 学习位置 | 本地实战P1-02，学习中 |
 | 概念阅读 | 用户确认全部看完，不自动等于全部模块可独立实现 |
 | Day 1–4 | 已讲解并准备/验证实验，个人自测结果仍由学习者填写 |
 | Day 5 | 已完成本轮讲解，用户决定进入下一天；个人独立自测结果尚未登记 |
 | Day 6 | 本轮讲解与教程补充收尾，用户决定进入下一天；个人独立验收尚未登记 |
 | Day 7 | 本轮教程与实验已完成准备，个人独立验收尚未登记 |
-| Day 8实现内容 | 作为P1-01第一关，自己的candidate代码尚未验收 |
+| Day 8实现内容 | 用户my_ops.py通过P1-01的CPU/CUDA各14项；报告与源码hash见实战日志 |
+| Day 9计算核心 | 当前P1-02，自己的单头Attention文件尚未验收 |
 | Day 9–30实现内容 | 概念已读，参考材料已备齐；按实战关卡独立实现，Day 22真实服务仍未配置 |
 | 掌握程度 | 不因助手写完参考答案或测试通过而自动提升 |
 
@@ -40,11 +42,15 @@
 
 ## 当前：本地实战起步
 
-先打开 [实战P1-01 Notebook](../learning/practice01_start.ipynb)：
-CPU参考基线 → CUDA参考基线 → 你自己的 `learning/my_ops.py` → candidate验收。
-验收器：[local_practice.py](../learning/local_practice.py)。
+先打开 [P1-02教程](PRACTICE_P1_02_ATTENTION.md) 和
+[Attention实战Notebook](../learning/practice02_attention.ipynb)：
+手算17.5 → 直接填写 [Attention注释模板](../learning/my_attention_template.py)
+中的A1–A5 → CPU验收 → CUDA验收 → 故障注入。
+模板已集中变量、讲解、shape与命令，不必另建文件或同时翻阅多个文档。
+验收器：[local_practice.py](../learning/local_practice.py)，本关选择 `--task attention`。
+上一关 `my_ops.py` 已通过定义范围内检查，保持源码不被后续模板覆盖。
 未传candidate时只验证参考实现；传文件也不自动证明独立创作或精通。
-本地第一关不需要重建镜像、下载模型或升级现有依赖。
+本关不需要重建镜像、下载模型或升级现有依赖，先不加入投影/RoPE/Cache管理。
 
 ## Day 8 参考入口
 

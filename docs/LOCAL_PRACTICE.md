@@ -2,8 +2,22 @@
 
 用户已确认概念课程全部阅读，现进入本地实战。
 “已读完”是用户学习记录，不自动等于所有模块已独立实现或性能验收。
-当前第一关为 **P1-01：RMSNorm/RoPE，自己的代码通过CPU与CUDA验收**。
-交互入口：[P1-01 Notebook](../learning/practice01_start.ipynb)。
+当前关卡为 **P1-02：单头因果Attention计算核心**。
+P1-01的用户 `my_ops.py` 已通过本关支持范围的CPU/CUDA各14项检查，记录见
+[实战日志](LOCAL_PRACTICE_LOG.md)，不把该结果推广为所有输入或性能已验收。
+现在直接填写 [Attention注释模板](../learning/my_attention_template.py)，
+同一文件已包含讲解与验收命令；[P1-02教程](PRACTICE_P1_02_ATTENTION.md) 与
+[Notebook](../learning/practice02_attention.ipynb)作为可选补充。
+P1-01入口 [Norm/RoPE Notebook](../learning/practice01_start.ipynb) 保留作复习。
+
+本关验收必须显式选择任务：
+
+```bash
+python -m learning.local_practice --task attention --device cpu --candidate learning/my_attention_template.py
+python -m learning.local_practice --task attention --device cuda --candidate learning/my_attention_template.py
+```
+
+默认不传 `--task` 仍运行P1-01，避免改变既有命令含义。
 
 ## 1. 先做一个最小闭环
 
@@ -22,7 +36,7 @@ CUDA FP32：真实GPU执行，不静默改用CPU
 你自己的实现放在单独文件，不覆盖课程参考。
 第一关不追求更快，先正确；P1-01报告不包含性能结果。
 
-## 2. 现在在本机怎么开始
+## 2. P1-01已完成验收的基线入口（保留复习）
 
 在现有Jupyter的Terminal里：
 
@@ -46,7 +60,7 @@ docker compose -f docker-compose.spark.yml exec -T reasoning \
 GPU验证把最后的cpu改为cuda即可。CUDA不可用会明确失败，保留错误报告，不改用CPU掩盖问题。
 无需停止现有Jupyter、删除volume或升级torch。
 
-## 3. P1-01：今天你真正要写的代码
+## 3. P1-01：RMSNorm/RoPE接口（保留复习）
 
 在当前工作区编写 `learning/my_ops.py`，导出以下两个接口：
 实现思路和每个TODO的中文说明见 [my_ops实现指导](MY_OPS_IMPLEMENTATION.md)，
@@ -108,14 +122,14 @@ RoPE：
 
 ## 5. 后续实战关卡
 
-下面是实践顺序，不是自动完成清单。除P1-01自写模块入口外，
-现有课程测试主要验证参考代码；要验收你自己的后续实现，先把对应测试明确接到你的模块，
+下面是实践顺序，不是自动完成清单。P1-01和P1-02支持加载自己的candidate文件；
+其余关卡的现有课程测试主要验证参考代码；要验收你自己的后续实现，先把对应测试明确接到你的模块，
 不能只运行参考测试就宣称个人实现通过。
 
 | 关卡 | 亲手任务 | 第一组验收/故障注入 | 对照资料 |
 | --- | --- | --- | --- |
 | P1-01 | RMSNorm/RoPE | 14项CPU→CUDA；错offset | [Day 8](DAY08_RMSNORM_ROPE.md) |
-| P1-02 | 单头Attention | 未来token扰动前缀；反转Mask应失败 | [Day 9](DAY09_SINGLE_ATTENTION.md) |
+| P1-02 | 单头Attention核心 | 14项CPU→CUDA、手算17.5、矩形Mask与梯度 | [实战](PRACTICE_P1_02_ATTENTION.md)、[Day 9](DAY09_SINGLE_ATTENTION.md) |
 | P1-03 | MHA拆头/合头 | T>1标签追踪；漏transpose | [Day 10](DAY10_MULTIHEAD.md) |
 | P1-04 | MQA/GQA参数化 | Hkv=1/2/4各自full/cached对齐 | [Day 11](DAY11_GQA_MQA.md) |
 | P1-05 | 请求级KV Cache | 3+2+3、多步增长、上下文拒绝不污染 | [Day 12](DAY12_REQUEST_CACHE.md) |
@@ -158,4 +172,5 @@ P1-01不要急着测ns级小算子的“加速比”；先交出CPU与CUDA正确
 
 本次实战开始和待填记录见 [实战日志](LOCAL_PRACTICE_LOG.md)。
 示例报告只是环境/参考/候选实现证据，不自动更新个人掌握程度。
-下一步最具体的动作：**完成自己的 `learning/my_ops.py`，先跑CPU验收，带着第一个失败项修改。**
+下一步最具体的动作：**保留已经通过的 `my_ops.py`，直接在
+`learning/my_attention_template.py` 填写A1–A5，再用 `--task attention` 从CPU验收开始。**

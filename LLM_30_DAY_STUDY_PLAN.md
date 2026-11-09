@@ -18,15 +18,16 @@
 
 ## 当前进度与执行起点
 
-**当前阶段：用户确认概念课程全部阅读，进入本地实战P1-01。**
+**当前阶段：P1-01用户代码验收通过，进入本地实战P1-02单头Attention。**
 2026-11-08起按 [反复练习教程](docs/LOCAL_PRACTICE.md)、
-[实战Notebook](learning/practice01_start.ipynb)与[实战日志](docs/LOCAL_PRACTICE_LOG.md)
+[P1-02步骤](docs/PRACTICE_P1_02_ATTENTION.md)、
+[实战Notebook](learning/practice02_attention.ipynb)与[实战日志](docs/LOCAL_PRACTICE_LOG.md)
 推进；对应原Day 8–30的实现/验证内容，不将“读完”视为独立验收完成。
 材料自动准备不改变个人完成状态；旧的 Day 2 启动清单保留作复习。
 后续参考实现、每日 Notebook 和验证入口见 [Day 6–30 课程](docs/COURSE_DAY06_30.md)。
 **Day 9–30全部22份详细教程**见 [逐日图解与实验总表](docs/COURSE_DAY09_30_DETAILS.md)，
 已按图解、数字例子、源码/Jupyter、调试优化、自测答案与资料展开。
-材料备齐不表示后续实现已经完成，当前任务为P1-01。
+材料备齐不表示后续实现已经完成，当前任务为P1-02。
 **每日知识点、概念、公式、误区、面试主问/追问与掌握标准**见
 [30 天知识与面试索引](docs/KNOWLEDGE_INDEX.md)，覆盖 Day 1–30。
 公式中的字母、张量轴和配置名称统一查阅
@@ -41,14 +42,15 @@
 | --- | --- | --- |
 | Spark 镜像、CUDA 前后向、Triton JIT | 已实测通过 | 环境准备完成，不必每天重建 |
 | Qwen3 生成和小规模推理/训练 smoke | 已实测通过 | 有可运行的参考实现，不等于已经理解模型 |
-| 普通测试（含新增课程） | 355 passed / 27 skipped | 现有Spark工作区缓存数据回归；不是个人掌握评分，历史与失败记录另行保留 |
+| 普通测试（含新增课程） | 364 passed / 27 skipped | 现有Spark工作区缓存数据回归；不是个人掌握评分，历史与失败记录另行保留 |
 | Day 1 独立复现与笔记 | 待自己验收 | 独立运行一次生成，能找到设备、Cache 和日志 |
 | Day 2–4 模型、Shape、Cache | 已讲解并准备实验 | 个人理解仍需用自测题确认 |
 | Day 5 架构、MoE、MLA | 本轮讲解结束，用户决定进入下一天 | 独立自测结果尚未登记 |
 | Day 6 Online Softmax/FlashAttention | 本轮教程收尾，个人独立验收尚未登记 | 参考实验通过不代替个人掌握 |
 | Day 7 请求生命周期与调度 | 本轮教程与实验已准备，个人验收尚未登记 | 参考结果不代替独立口述 |
 | 概念课程阅读 | 用户确认全部阅读 | 独立实现与优化结论另验收 |
-| P1-01（Day 8对应内容） | 当前实战任务 | 自己的RMSNorm/RoPE代码、CPU→CUDA和失败报告 |
+| P1-01（Day 8对应内容） | 用户my_ops.py的CPU/CUDA各14项通过 | 定义范围内验收，不代表性能/所有输入已覆盖 |
+| P1-02（Day 9核心） | 当前实战任务 | 自己的Attention核心、Mask/offset、CPU→CUDA和错误记录 |
 | Day 9–30 的实现产出 | 按实战关卡推进，个人尚未验收 | 不把参考代码通过当成自写实现通过 |
 
 运行证据见 [Spark 验证记录](docs/DGX_SPARK_VALIDATION.md)。

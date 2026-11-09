@@ -1,7 +1,9 @@
 # 每日关键知识与面试索引
 
 当前阶段：[概念阅读完成，进入本地实战](LEARNING_PROGRESS.md)。
-反复练习和当前P1-01验收见 [实战教程](LOCAL_PRACTICE.md) 与 [实战日志](LOCAL_PRACTICE_LOG.md)。
+P1-01用户文件已通过定义范围的CPU/CUDA检查，当前练习
+[P1-02单头Attention](PRACTICE_P1_02_ATTENTION.md)。
+整体关卡见 [实战教程](LOCAL_PRACTICE.md) 与 [实战日志](LOCAL_PRACTICE_LOG.md)。
 Day 9–30按相同形式展开的22份教程见 [详细课程总入口](COURSE_DAY09_30_DETAILS.md)，
 每课含图解、计算/数据契约、Jupyter步骤、调试优化、自测答案和一手资料。
 以下是学习材料，不是已通过的能力证书。

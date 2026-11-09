@@ -2,9 +2,12 @@
 
 这里保存 30 天学习过程中的可复现实验和小型实现。
 
-**当前阶段：概念阅读完成，进入本地实战P1-01。**
-先打开 [实战Notebook](practice01_start.ipynb)，按 [反复练习教程](../docs/LOCAL_PRACTICE.md)
-写自己的代码，再用 `python -m learning.local_practice --candidate learning/my_ops.py` 验收。
+**当前阶段：P1-01用户代码已通过，进入本地实战P1-02单头Attention。**
+直接在 [Attention注释模板](my_attention_template.py) 填A1–A5；
+模板负责可执行练习，完整的文件职责、公式、边界和验收口径统一见
+[P1-02实战教程](../docs/PRACTICE_P1_02_ATTENTION.md)。
+Notebook只作逐格观察补充，不替代个人实现或验收记录。
+用 `python -m learning.local_practice --task attention --candidate learning/my_attention_template.py` 验收。
 见 [进度](../docs/LEARNING_PROGRESS.md) 和 [实战日志](../docs/LOCAL_PRACTICE_LOG.md)。
 先看 [每日关键知识与面试索引](../docs/KNOWLEDGE_INDEX.md) 和
 [Day 6–30 可执行课程](../docs/COURSE_DAY06_30.md)。
@@ -19,6 +22,7 @@ Day 9–30的详细教程、实验入口和个人记录模板见
 | 阶段 | 入口 |
 | --- | --- |
 | 本地实战P1-01 | `practice01_start.ipynb`、`local_practice.py`；CPU先对齐，之后明确请求CUDA |
+| 本地实战P1-02 | `practice02_attention.ipynb`、`my_attention_template.py`、`practice_attention.py` |
 | Day 3 | `day03_debug.ipynb`、`day03_shapes.py` |
 | Day 3 RoPE/SwiGLU | `day03_rope_swiglu.ipynb` |
 | Day 4 | `day04_kv_cache.ipynb`、`day04_cache.py` |
