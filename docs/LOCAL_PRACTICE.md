@@ -5,19 +5,22 @@
 当前关卡为 **P1-02：单头因果Attention计算核心**。
 P1-01的用户 `my_ops.py` 已通过本关支持范围的CPU/CUDA各14项检查，记录见
 [实战日志](LOCAL_PRACTICE_LOG.md)，不把该结果推广为所有输入或性能已验收。
-现在直接填写 [Attention注释模板](../learning/my_attention_template.py)，
-同一文件已包含讲解与验收命令；[P1-02教程](PRACTICE_P1_02_ATTENTION.md) 与
+现在查看 [统一注释模板](../learning/my_ops_template.py) 的Attention部分，
+在已有的 `learning/my_ops.py` 中新增 `causal_attention`，不覆盖RMSNorm/RoPE。
+模板保持未完成，个人实现始终使用同一文件；[P1-02教程](PRACTICE_P1_02_ATTENTION.md) 与
 [Notebook](../learning/practice02_attention.ipynb)作为可选补充。
 P1-01入口 [Norm/RoPE Notebook](../learning/practice01_start.ipynb) 保留作复习。
 
 本关验收必须显式选择任务：
 
 ```bash
-python -m learning.local_practice --task attention --device cpu --candidate learning/my_attention_template.py
-python -m learning.local_practice --task attention --device cuda --candidate learning/my_attention_template.py
+python -m learning.local_practice --task attention --device cpu --candidate learning/my_ops.py
+python -m learning.local_practice --task attention --device cuda --candidate learning/my_ops.py
 ```
 
 默认不传 `--task` 仍运行P1-01，避免改变既有命令含义。
+P1-01/P1-02按任务检查各自接口，共用 `my_ops.py`，未完成的新任务不阻塞已有任务。
+后续关卡的模板继续集中到 `my_ops_template.py`，不提前声称尚未接入的任务已能验收。
 
 ## 1. 先做一个最小闭环
 
@@ -33,7 +36,7 @@ CUDA FP32：真实GPU执行，不静默改用CPU
 
 不需要重建Docker、不下载大模型、不重新读30天概念。
 现有 `learning/mini_transformer`、`kernels`、`mini_vllm` 保留为参考，
-你自己的实现放在单独文件，不覆盖课程参考。
+你自己的实现集中在 `my_ops.py`，与模板和课程参考分开。
 第一关不追求更快，先正确；P1-01报告不包含性能结果。
 
 ## 2. P1-01已完成验收的基线入口（保留复习）
@@ -172,5 +175,5 @@ P1-01不要急着测ns级小算子的“加速比”；先交出CPU与CUDA正确
 
 本次实战开始和待填记录见 [实战日志](LOCAL_PRACTICE_LOG.md)。
 示例报告只是环境/参考/候选实现证据，不自动更新个人掌握程度。
-下一步最具体的动作：**保留已经通过的 `my_ops.py`，直接在
-`learning/my_attention_template.py` 填写A1–A5，再用 `--task attention` 从CPU验收开始。**
+下一步最具体的动作：**看 `my_ops_template.py` 的A1–A5，在
+`learning/my_ops.py` 新增causal_attention，再用 `--task attention` 从CPU验收开始。**

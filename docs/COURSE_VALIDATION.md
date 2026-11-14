@@ -395,7 +395,7 @@ Day 22没有服务、Day 15/16依赖实际CUDA binary、Day 17–21依赖GPU；
   低精度、性能或独立创作证明。
 - 下一关新增 [P1-02教程](PRACTICE_P1_02_ATTENTION.md)、
   [Notebook](../learning/practice02_attention.ipynb)、
-  `my_attention_template.py`与`practice_attention.py`；
+  独立Attention模板（2026-11-14已合并到`my_ops_template.py`）与`practice_attention.py`；
   用户自己的Attention实现仍待完成/指定。
 - `--task attention`加载causal_attention接口；不传task的旧命令仍执行P1-01。
   reference baseline与candidate file明确区分，报告不会覆盖旧文件。
@@ -409,6 +409,28 @@ Day 22没有服务、Day 15/16依赖实际CUDA binary、Day 17–21依赖GPU；
 用户P1-01与参考P1-02报告路径见 [实战日志](LOCAL_PRACTICE_LOG.md)。
 后者只是Attention核心，不含Q/K/V投影、RoPE、Cache分配、输出投影、生成、
 低精度或GPU性能验证；进入P1-02不自动登记为该关已通过。
+
+## 统一my_ops模板与候选文件
+
+2026-11-14（Asia/Singapore），按用户要求沿用P1-01练习方式：
+RMSNorm/RoPE与Attention的模板集中在 `learning/my_ops_template.py`，
+个人实现统一放在 `learning/my_ops.py`，移除独立Attention模板。
+现有验收器无需改动，按task检查同一candidate的对应接口。
+
+- 在现有Spark容器运行两份实战验收器测试：**19 passed**。
+  新增同一candidate分别通过两个task的CLI测试，以及Attention仍未实现时
+  不阻塞P1-01、也不会误判P1-02通过的测试；临时测试fixture不代表用户实现。
+- 统一模板及修改的测试文件通过Ruff；P1-02 Notebook通过schema和全部代码单元格语法检查。
+  本轮未重新执行Notebook的CUDA计算，不产生新的个人Attention或GPU性能结论。
+- 教程、模板、Notebook和测试已选择性同步到现有Jupyter卷，
+  原文件备份在
+  `/workspace/logs/course-sync-backup/unified-ops-20261114T112334019835Z/`。
+  容器中的旧Attention模板移到备份目录，未丢弃其中内容。
+- 用户 `my_ops.py` 未修改、未覆盖，宿主机与容器源码hash仍为
+  `70b81c835cd769c7799595b9db44e051bae5b9df741fe4ea7174c2ec2af6bff9`。
+
+当前仍是P1-02待实现/验收，下一步是在个人文件中新增causal_attention，
+以 `--task attention --candidate learning/my_ops.py` 先CPU后CUDA验收。
 
 ## 原始记录
 

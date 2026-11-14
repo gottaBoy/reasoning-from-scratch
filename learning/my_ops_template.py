@@ -1,8 +1,23 @@
-"""P1-01 learner scaffold, not a completed implementation.
+"""Shared learner scaffold for P1-01 and P1-02, not completed implementations.
 
-Chinese walkthrough: docs/MY_OPS_IMPLEMENTATION.md.
+Read the hints here; implement each operation in learning/my_ops.py.
+Keep this template unfinished and do not overwrite existing learner code.
+P1-01: RMSNorm and rope; P1-02: causal_attention.
+Chinese walkthroughs:
+    docs/MY_OPS_IMPLEMENTATION.md
+    docs/PRACTICE_P1_02_ATTENTION.md
 Importing this file is safe. Calling an unfinished operation raises
 NotImplementedError on purpose; it must not be reported as a passed candidate.
+
+Inside the existing Jupyter Terminal:
+    cd /workspace
+    python -m learning.local_practice --task norm-rope --device cpu \\
+        --candidate learning/my_ops.py
+    python -m learning.local_practice --task attention --device cpu \\
+        --candidate learning/my_ops.py
+
+After CPU acceptance, repeat with --device cuda. Each task checks only its
+required exports, so an unfinished Attention body does not block P1-01.
 """
 
 import torch
@@ -66,3 +81,78 @@ def rope(x, start=0, theta=10_000.0):
     # Do not modify x in-place or move a CUDA input back to CPU.
     _ = x_fp32, input_dtype, half
     raise NotImplementedError("Fill P1-P7 in your own implementation.")
+
+
+def causal_attention(q, k, v, start=0):
+    """P1-02: implement A1-A5 in learning/my_ops.py, preserving P1-01 code.
+
+    Inputs and output
+    -----------------
+    q: Query vectors, [B,1,T_q,D_k].
+    k: Key vectors, [B,1,T_kv,D_k].
+    v: Value vectors, [B,1,T_kv,D_v].
+    Output: [B,1,T_q,D_v], with the same device and FP32 dtype.
+    B is Batch Size; this exercise fixes the head count to one.
+    T_q and T_kv are Query and Key/Value Sequence Lengths, not feature widths.
+    D_k is Query/Key Head Dimension; D_v is Value Head Dimension.
+    D_v may differ from D_k. All inputs are nonempty, same-device FP32.
+    Q/K/V are already projected; do not add Linear, RoPE or cache allocation.
+
+    Hand calculation
+    ----------------
+    Q=[0, sqrt(2)*ln(3)], K0=[1,0], K1=[0,1], V0=[10], V1=[20].
+    With start=1, both keys are visible.
+    Scaled scores=[0,ln(3)] -> probabilities=[1/4,3/4] -> output=17.5.
+    ln denotes the natural logarithm; these numbers do not model word meanings.
+
+    Absolute positions and masking
+    ------------------------------
+    start is the first Query's absolute position, not a tensor slice offset.
+    Prefill: start=0, T_q=T_kv=3; rows can read 1, 2 and 3 keys.
+    Cached chunk: start=4, T_q=3, T_kv=7; rows can read 5, 6 and 7 keys.
+    History K/V are supplied by the caller; this function does not store them.
+    Fill future scores with -inf before softmax, not zero: exp(0)=1.
+
+    Acceptance and deliberate mistakes
+    ----------------------------------
+    Run --task attention --candidate learning/my_ops.py, first CPU then CUDA.
+    Fourteen checks cover numeric results, rectangular masks, gradients,
+    unchanged inputs and invalid arguments, not timing or production readiness.
+    After passing, break one thing: scaling, mask fill, softmax axis or start.
+    Record the failing case, restore correctness and try a new input shape.
+    """
+    if q.ndim != 4 or k.ndim != 4 or v.ndim != 4:
+        raise ValueError("Use [B,1,T,D] tensors.")
+    if (min(*q.shape, *k.shape, *v.shape) < 1
+            or q.shape[1] != 1 or k.shape[1] != 1 or v.shape[1] != 1
+            or q.shape[0] != k.shape[0] or k.shape[:3] != v.shape[:3]
+            or q.shape[-1] != k.shape[-1]):
+        raise ValueError("Use compatible nonempty single-head inputs.")
+    if any(x.device != q.device or x.dtype != torch.float32 for x in (q, k, v)):
+        raise ValueError("Same-device FP32 inputs required.")
+    if not isinstance(start, int) or isinstance(start, bool) or not 0 <= start <= k.shape[2] - q.shape[2]:
+        raise ValueError("Invalid query start position.")
+
+    # TODO A1: scores = q @ k.transpose(-2, -1), divided by sqrt(D_k).
+    # D_k=q.shape[-1]. [T_q,D_k] @ [D_k,T_kv] -> [T_q,T_kv].
+    # The dot product sums over D_k; preserve the batch and head axes.
+    # Full scores shape: [B,1,T_q,T_kv].
+
+    # TODO A2: Build query_positions and key_positions on q.device.
+    # Query positions: start..start+T_q-1; Key positions: 0..T_kv-1.
+    # Use [:,None] for Query rows and [None,:] for Key columns.
+
+    # TODO A3: blocked[i,j] = key_positions[j] > query_positions[i].
+    # Shape: [T_q,T_kv], broadcast over batch/head. True means blocked.
+    # Use masked_fill with -torch.inf. SDPA bool masks use True=allowed.
+
+    # TODO A4: probabilities = softmax(scores, dim=-1), over Key positions.
+    # Each Query row sums to one; shape remains [B,1,T_q,T_kv].
+    # This exercise has no dropout.
+
+    # TODO A5: output = probabilities @ v; return output.
+    # [T_q,T_kv] @ [T_kv,D_v] -> [T_q,D_v]: sum over Key positions.
+    # Full output: [B,1,T_q,D_v]. Query length comes from Q, width from V.
+    # Preserve autograd: no detach(), no no_grad, no in-place input changes.
+    # Do not replace your implementation with an import of the reference.
+    raise NotImplementedError("Fill A1-A5 in your own implementation.")

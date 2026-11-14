@@ -2,7 +2,7 @@
 
 用户确认：**概念课程已全部阅读，进入本地实战**。
 当前关卡：**P1-02：单头因果Attention核心**（对应原Day 9的计算内容）。
-更新时间：2026-11-08（America/Los_Angeles）。
+更新时间：2026-11-14（Asia/Singapore）。
 用户的my_ops.py已通过P1-01支持范围的CPU/CUDA验收；概念阅读、代码验收与性能仍分别记录。
 
 | 维度 | 状态 |
@@ -44,11 +44,12 @@
 
 先打开 [P1-02教程](PRACTICE_P1_02_ATTENTION.md) 和
 [Attention实战Notebook](../learning/practice02_attention.ipynb)：
-手算17.5 → 直接填写 [Attention注释模板](../learning/my_attention_template.py)
-中的A1–A5 → CPU验收 → CUDA验收 → 故障注入。
-模板已集中变量、讲解、shape与命令，不必另建文件或同时翻阅多个文档。
+手算17.5 → 查看 [统一注释模板](../learning/my_ops_template.py) 中的A1–A5
+→ 在 `learning/my_ops.py` 新增causal_attention → CPU验收 → CUDA验收 → 故障注入。
+各关模板集中放在 `my_ops_template.py`，保持未完成；你只在 `my_ops.py` 中实现，
+无需单独的Attention模板/实现文件。
 验收器：[local_practice.py](../learning/local_practice.py)，本关选择 `--task attention`。
-上一关 `my_ops.py` 已通过定义范围内检查，保持源码不被后续模板覆盖。
+上一关RMSNorm/RoPE已通过定义范围内检查，在同一文件中新增函数，不覆盖已有实现。
 未传candidate时只验证参考实现；传文件也不自动证明独立创作或精通。
 本关不需要重建镜像、下载模型或升级现有依赖，先不加入投影/RoPE/Cache管理。
 

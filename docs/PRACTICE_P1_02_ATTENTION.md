@@ -3,9 +3,10 @@
 上一关：[RMSNorm/RoPE](MY_OPS_IMPLEMENTATION.md)。这里进入对应原Day 9的本地实战。
 本关只写计算核心，**Q/K/V已经给定**；不创建Linear投影、RoPE或持久Cache。
 不要一次加入五个模块，让第一次报错不知道来自哪一步。
-**主要练习入口是 [单文件注释模板](../learning/my_attention_template.py)**：
-变量、手算、位置规则、A1–A5和验收命令已集中在模板中。
-可直接填写模板，不必为了学习再另建文件；本页仅作可选深入阅读。
+**统一查看 [my_ops注释模板](../learning/my_ops_template.py)，只在
+`learning/my_ops.py` 中实现**。变量、手算、位置规则、A1–A5和验收命令
+集中在模板的 `causal_attention` 部分；模板保持未完成状态，方便复习。
+不再单独建立Attention模板或实现文件。
 
 ## 1. 先手算一个输出17.5
 
@@ -26,17 +27,17 @@ softmax = [1/4,3/4]
 
 ## 2. 五步写完核心
 
-在 `learning/my_attention_template.py` 内完成以下接口：
+参照 `learning/my_ops_template.py` 的Attention部分，在已有的
+`learning/my_ops.py` 中新增并完成以下接口：
 
 ```python
 def causal_attention(q, k, v, start=0):
     ...
 ```
 
-模板已提供参数校验；保留A1–A5注释作引导，完成后将占位异常换成return。
-如果你更愿意保留一份空白模板，也可另建my_attention.py并将candidate换为那个路径，
-但这不是必要步骤。
-保留 `my_ops.py`，不要把上一关的函数删掉。
+模板已提供参数校验和A1–A5注释，作为你实现时的提示。
+仅在自己的 `my_ops.py` 中将待填写部分变成实际计算与return；
+不要用整个模板覆盖该文件，也不要重新定义或删除上一关已完成的RMSNorm/RoPE。
 
 | 步骤 | 你实现什么 | shape |
 | --- | --- | --- |
@@ -80,10 +81,13 @@ Key位置=[0,1,2,3,4,5,6]
 
 ```bash
 cd /workspace
-python -m learning.local_practice --task attention --device cpu --candidate learning/my_attention_template.py
-python -m learning.local_practice --task attention --device cuda --candidate learning/my_attention_template.py
+python -m learning.local_practice --task attention --device cpu --candidate learning/my_ops.py
+python -m learning.local_practice --task attention --device cuda --candidate learning/my_ops.py
 ```
 
+两个关卡使用同一实现文件：`--task norm-rope`只要求RMSNorm与rope，
+`--task attention`只要求causal_attention。Attention尚未实现不会影响上一关验收；
+若尚未定义该函数，Attention任务会明确报告缺少接口，不回退到参考答案。
 未传candidate时，仅运行 `reference_baseline`；用户candidate未完成时不能记成个人通过。
 每轮使用新报告名，默认自动生成到 `logs/practice/`，旧结果不覆盖。
 从宿主机运行要先把新文件有选择地同步进 `/workspace/learning/`；
@@ -113,24 +117,26 @@ Q/K/V反向梯度有限并对齐SDPA
 上一关文件中的已完成TODO和return后的占位异常可在你确认后清理，
 但不需要为了进入本关重写已经通过的计算。练习与参考实现分开，不自动提交你的填写结果。
 
-## 6. 文件职责：为什么集中在一个模板
+## 6. 文件职责：一个模板，一份个人实现
 
-本关不再要求另建 `my_attention.py`。这样安排是为了让“解释、待实现步骤和运行命令”
-在同一个可执行入口中，减少在多个文件之间来回猜测。
+延续P1-01的练习方式：模板集中提示，你在同一份个人文件中逐步积累实现。
+不用每学一个算子就增加一组模板/实现文件，也不会误把模板当成已完成代码。
+这里的“都放一起”指学习模板和个人实现各自集中，独立验收器仍保留，避免自测自证。
 
 | 文件 | 职责 | 是否是你的实现 |
 | --- | --- | --- |
-| `learning/my_attention_template.py` | 主要练习入口；A1–A5、变量含义、手算例和命令都在这里 | 是，填写后作为candidate验收 |
+| `learning/my_ops_template.py` | 统一提示；R1–R4、P1–P7、A1–A5及接口/shape/手算/命令 | 否，保持未完成的教学模板 |
+| `learning/my_ops.py` | 个人实现；保留RMSNorm/RoPE，新增causal_attention | 是，所有已支持任务共用该candidate |
 | `docs/PRACTICE_P1_02_ATTENTION.md` | 解释公式、shape、Mask、`start`、失败模式和验收边界 | 否，学习与复盘文档 |
 | `learning/practice02_attention.ipynb` | 把手算、Mask可视化和验收命令放进Jupyter，便于逐格观察 | 否，可选观察工具 |
 | `learning/practice_attention.py` | 独立oracle、负例和梯度验收；不应被改成“放宽测试”的版本 | 否，验收器/参考基线 |
 | `learning/local_practice.py` | 根据 `--task attention` 加载candidate并生成报告 | 否，统一入口 |
-| `learning/my_ops.py` | 上一关已经完成的RMSNorm/RoPE实现 | 是，保留，不在本关覆盖 |
 
-因此，本关的唯一实现动作是：**填写
-`learning/my_attention_template.py` 的A1–A5，先CPU后CUDA**。
+因此，本关的实现动作是：**看统一模板的A1–A5，在
+`learning/my_ops.py` 新增causal_attention，先CPU后CUDA**。
 参考baseline通过只说明验收器和环境可用；candidate通过才记录为你这一关的实测结果。
-模板中的 `NotImplementedError` 在填写前是故意保留的，不能通过删除测试或直接调用参考实现来绕过。
+模板中的 `NotImplementedError` 故意保留；验收指向自己的文件，
+不能通过删除测试或直接调用参考实现来绕过练习。
 
 ## 7. 阅读与边界
 

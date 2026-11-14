@@ -3,6 +3,9 @@
 本页是实现指导，不直接把你的练习替换成参考答案。
 配套文件：[可安全导入的模板](../learning/my_ops_template.py)、
 [实战Notebook](../learning/practice01_start.ipynb)。
+统一约定：`my_ops_template.py`集中各关接口与提示，保持未完成状态；
+你只在 `my_ops.py` 中逐步实现，不要用整个模板覆盖已有代码。
+模板目前含P1-01的RMSNorm/RoPE与P1-02的causal_attention，按任务分别验收。
 
 ## 1. 先分清“定义接口”和“调用接口”
 
@@ -143,4 +146,5 @@ python -m learning.local_practice --device cuda --candidate learning/my_ops.py
 
 本模板说明接口与实现顺序，不是完整生产算子，也不自动证明独立实现或GPU性能。
 自己的RMSNorm/RoPE文件通过定义范围的CPU/CUDA验收后，继续
-[P1-02单头因果Attention](PRACTICE_P1_02_ATTENTION.md)，不要覆盖已完成的my_ops.py。
+[P1-02单头因果Attention](PRACTICE_P1_02_ATTENTION.md)：
+参照同一模板，在 `my_ops.py` 中新增causal_attention，保留已完成的RMSNorm/RoPE。

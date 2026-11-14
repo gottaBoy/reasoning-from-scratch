@@ -14,7 +14,7 @@
 | 验收入口 | `python -m learning.local_practice --task attention`；默认任务仍为norm-rope，可传自己的candidate文件 |
 | 参考CPU/CUDA基线 | 本次均14/14通过，implementation_role为reference_baseline |
 | P1-01用户candidate | `/workspace/learning/my_ops.py`，支持范围内CPU/CUDA均14/14通过 |
-| P1-02用户candidate | 尚未指定/验收，当前只准备模板与参考验收 |
+| P1-02用户candidate | 已约定使用 `/workspace/learning/my_ops.py`；causal_attention仍待实现/验收 |
 | 后续模型/算子/引擎/服务 | 按关卡推进，未自动通过；真实vLLM仍未配置 |
 
 ## 已执行的参考证据
@@ -80,7 +80,7 @@ CUDA：14 passed / 0 failed
 全仓库普通回归364 passed / 27 skipped / 1 warning；保留GB10提示。
 源码、文件路径和报告的变化要按各自的hash与时间记录，不覆盖P1-01证据。
 
-## 本轮文档归档决定
+## 此前文档归档决定（已由下节更新）
 
 本轮确认：P1-02不另建`my_attention.py`，直接在
 `learning/my_attention_template.py`完成A1–A5。模板集中放置变量说明、shape推导、
@@ -97,6 +97,30 @@ CUDA：14 passed / 0 failed
 → 一个独立验收器
 → 一份个人运行日志
 ```
+
+## 2026-11-14：统一模板与个人实现
+
+用户决定沿用P1-01方式，不再直接填写独立Attention模板。
+当前约定取代上一节的文件组织方式：
+
+```text
+my_ops_template.py：集中RMSNorm、RoPE、Attention的接口、TODO、shape与手算提示
+my_ops.py：用户唯一的个人实现文件，保留已完成部分，逐关新增函数
+local_practice.py：按--task选择接口，加载同一个candidate文件，记录独立报告
+```
+
+已将Attention的A1–A5合并到统一模板并移除独立模板；
+同步更新教程、Notebook和命令。`--task norm-rope`只检查RMSNorm/rope，
+`--task attention`只检查causal_attention，后续未完成的函数不阻塞已完成关卡。
+模板保持未完成；本轮不修改用户 `my_ops.py`，也不登记Attention个人验收通过。
+后续新增关卡继续集中维护模板与个人实现，独立oracle/验收器仍与二者分离。
+
+本轮容器内两份实战验收器测试19项通过，Ruff与Notebook结构/语法检查通过；
+这不是用户Attention实现通过。已选择性同步教学文件至现有Jupyter卷，
+旧文件（含移出的独立Attention模板）保存在
+`/workspace/logs/course-sync-backup/unified-ops-20261114T112334019835Z/`。
+用户文件hash保持
+`70b81c835cd769c7799595b9db44e051bae5b9df741fe4ea7174c2ec2af6bff9`。
 
 ## 每轮填写
 

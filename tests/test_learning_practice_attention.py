@@ -8,7 +8,7 @@ import pytest
 import torch
 from torch.nn import functional as F
 
-from learning.local_practice import main
+from learning.local_practice import evaluate, main
 from learning.practice_attention import causal_attention, evaluate_attention
 
 
@@ -76,7 +76,7 @@ def test_attention_cli_records_missing_candidate_as_p1_02_error(tmp_path):
 
 
 def test_attention_scaffold_has_valid_guards_but_not_a_completed_body():
-    from learning.my_attention_template import causal_attention as unfinished
+    from learning.my_ops_template import causal_attention as unfinished
     q = torch.ones(1, 1, 1, 2)
     with pytest.raises(NotImplementedError):
         unfinished(q, q, q)
@@ -84,7 +84,40 @@ def test_attention_scaffold_has_valid_guards_but_not_a_completed_body():
         unfinished(q, q, q, start=-1)
 
 
+def test_same_candidate_file_supports_both_task_commands(tmp_path):
+    path = tmp_path / "my_ops.py"
+    path.write_text(
+        "from learning.mini_transformer import RMSNorm, rope\n"
+        "from learning.practice_attention import causal_attention\n"
+    )
+    reports = []
+    for task in ("norm-rope", "attention"):
+        output = tmp_path / f"{task}.json"
+        assert main(["--task", task, "--candidate", str(path),
+                     "--output", str(output)]) == 0
+        report = json.loads(output.read_text())
+        assert report["implementation_role"] == "candidate_file"
+        assert report["source"] == str(path)
+        assert report["passed"] == 14 and report["failed"] == 0
+        reports.append(report)
+    assert [report["practice"] for report in reports] == ["P1-01", "P1-02"]
+    assert reports[0]["source_sha256"] == reports[1]["source_sha256"]
+
+
+def test_unfinished_attention_does_not_block_norm_rope_in_shared_candidate(tmp_path):
+    path = tmp_path / "my_ops.py"
+    path.write_text(
+        "from learning.mini_transformer import RMSNorm, rope\n"
+        "from learning.my_ops_template import causal_attention\n"
+    )
+    assert evaluate("cpu", path)["status"] == "passed"
+    report = evaluate_attention("cpu", path)
+    assert report["status"] == "failed"
+    cases = {case["name"]: case for case in report["cases"]}
+    assert "NotImplementedError" in cases["handcalculated_last_query"]["error"]
+
+
 def test_acceptance_suite_does_not_reference_the_live_learner_file():
     text = Path(__file__).read_text()
-    assert "learning.my_attention" not in sys.modules
-    assert "import my_attention\n" not in text
+    assert "learning.my_ops" not in sys.modules
+    assert "import my_ops\n" not in text
