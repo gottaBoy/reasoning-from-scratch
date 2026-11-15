@@ -10,6 +10,8 @@ P1-01的用户 `my_ops.py` 已通过本关支持范围的CPU/CUDA各14项检查�
 模板保持未完成，个人实现始终使用同一文件；[P1-02教程](PRACTICE_P1_02_ATTENTION.md) 与
 [Notebook](../learning/practice02_attention.ipynb)作为可选补充。
 P1-01入口 [Norm/RoPE Notebook](../learning/practice01_start.ipynb) 保留作复习。
+模板另有 [中文图解版](../learning/my_ops_template_zh.py)，使用相同接口和TODO编号，
+用调音台、二维指针与查资料解释三个算子，任选一版阅读，个人实现仍只写 `my_ops.py`。
 
 本关验收必须显式选择任务：
 

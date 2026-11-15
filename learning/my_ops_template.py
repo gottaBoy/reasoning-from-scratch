@@ -3,6 +3,7 @@
 Read the hints here; implement each operation in learning/my_ops.py.
 Keep this template unfinished and do not overwrite existing learner code.
 P1-01: RMSNorm and rope; P1-02: causal_attention.
+Chinese companion with the same interfaces and TODOs: learning/my_ops_template_zh.py.
 Chinese walkthroughs:
     docs/MY_OPS_IMPLEMENTATION.md
     docs/PRACTICE_P1_02_ATTENTION.md

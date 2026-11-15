@@ -432,6 +432,27 @@ RMSNorm/RoPE与Attention的模板集中在 `learning/my_ops_template.py`，
 当前仍是P1-02待实现/验收，下一步是在个人文件中新增causal_attention，
 以 `--task attention --candidate learning/my_ops.py` 先CPU后CUDA验收。
 
+## 中文图解模板
+
+2026-11-14（Asia/Singapore），增加
+[统一模板中文图解版](../learning/my_ops_template_zh.py)：
+RMSNorm调音台、RoPE二维指针、Attention问题与资料卡片，
+逐步对应手算、shape、广播和TODO，不替用户填写实现。
+英文版本保留，个人实现仍只使用 `my_ops.py`，不是新增一份作业。
+
+- 三份相关测试文件在现有Spark容器执行：**24 passed**。
+  新增5项测试，覆盖去除文档字符串后AST与英文版一致、
+  三个算子保持未完成状态及参数拒绝校验。
+- 两版模板与新增测试均通过Ruff；宿主机语法编译、Git空白检查通过。
+- 教学文件选择性同步到Jupyter，原文件备份目录：
+  `/workspace/logs/course-sync-backup/ops-template-zh-20261114T124418464084Z/`。
+  未覆盖已有Notebook或个人 `my_ops.py`。
+- 宿主机个人文件本轮前后hash均为
+  `e26236d5fd6cc2541c3a155ed88fb562159ef1e82d32f32b20bd97dcd59ecda0`。
+  这是用户后续编辑的版本，本轮不对其重复验收，也不套用此前版本的通过结论。
+
+本轮不运行新的GPU性能实验，不将教学模板/验收器通过视为用户已完成Attention。
+
 ## 原始记录
 
 已执行 Notebook 和分日实验报告保存在现有 volume 中，不加入 Git：

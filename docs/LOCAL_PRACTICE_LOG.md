@@ -122,6 +122,58 @@ local_practice.py：按--task选择接口，加载同一个candidate文件，记
 用户文件hash保持
 `70b81c835cd769c7799595b9db44e051bae5b9df741fe4ea7174c2ec2af6bff9`。
 
+## 2026-11-14：增加中文图解模板
+
+保留统一英文模板，增加 [my_ops_template_zh.py](../learning/my_ops_template_zh.py)，
+同一文件涵盖RMSNorm、RoPE、Attention，不重新按算子拆文件。
+两种语言版本使用相同接口、参数校验、TODO编号和未完成占位，
+任选一版阅读，实现仍只写在个人 `my_ops.py` 中。
+
+中文说明采用“直觉比喻 -> 小数字手算 -> shape变化 -> TODO”的顺序：
+RMSNorm是总强度缩放与通道权重，RoPE是前后半部成对指针的不同频率旋转，
+Attention是问题/资料索引匹配后按权重混合内容。
+额外解释eps、dtype恢复、theta基数/弧度、绝对位置、mask方向及两个矩阵乘法消去的轴，
+并标明比喻不是真实通道语义，模板也不是完成的实现或性能证明。
+
+本轮不修改或同步个人实现文件；宿主机 `my_ops.py` 的起始hash为
+`e26236d5fd6cc2541c3a155ed88fb562159ef1e82d32f32b20bd97dcd59ecda0`，
+它是用户继续编辑后的状态，与此前验收hash分开记录，不沿用旧验收结论。
+
+中文模板与两份已有实战验收器测试合计 **24 passed**，Ruff通过。
+新增测试去除文档字符串后比较两版AST，确认接口与可执行代码一致；
+同时确认中文模板仍抛未完成异常，并保留参数拒绝校验。
+本轮只验收教学模板/验收链，不重新验收个人文件，不产生GPU性能结论。
+教学文件已选择性同步至Jupyter，旧文件备份于
+`/workspace/logs/course-sync-backup/ops-template-zh-20261114T124418464084Z/`。
+
+### 补充A1：Key转置与逐列打分
+
+用户追问 `k.transpose(-2,-1)`，已补入中文模板的Attention讲解及A1注释，
+并在 [P1-02教程第2.1节](PRACTICE_P1_02_ATTENTION.md#attention-key-transpose)
+集中说明：负轴编号、`[B,1,T_kv,D_k] -> [B,1,D_k,T_kv]`、
+3份资料/2个特征的行列图，以及`[1,2] @ K转置 = [5,11,17]`手算与Jupyter示例。
+区分未缩放点积分数、后续Mask/softmax和最终输出，不把转置误解为元素交换、
+reshape或原地修改；个人实现文件不改动。
+
+### 补充A3：多维分数与Mask广播
+
+用户继续追问多维张量的理解，已补入中文模板和
+[P1-02教程第2.2节](PRACTICE_P1_02_ATTENTION.md#attention-mask-broadcasting)：
+`scores[b,h,query_i,key_j]` 的四个轴、当前单头的
+`[B,1,T_q,T_kv]`、Mask的`[T_q,T_kv]`，以及从右向左对齐的广播规则。
+补充`B=2、H=2`时四张“问题×资料”表共用一张因果地图，
+并区分与batch/padding相关的`[B,1,T_q,T_kv]` mask及每个head不同的完整mask。
+本轮只更新教学说明，不修改个人 `my_ops.py`。
+
+### 补充A4：四种模态的直觉映射
+
+用户希望用文本、图片、音频、视频分别理解多维 Attention，已补入中文模板和
+[P1-02教程第2.3节](PRACTICE_P1_02_ATTENTION.md#attention-modalities)：
+文本用token、图片用patch、音频用时间帧、视频用时空patch/tubelet。
+文档同时说明`T`/`N`的含义、`[B,H,T_q,T_kv]`的统一结构，
+以及视觉双向Mask、流式音频因果Mask、视频时空Mask不能互相默认替换。
+这些是理解特征向量的类比，不把Value误说成原始文字/像素/音频/视频文件。
+
 ## 每轮填写
 
 ```text

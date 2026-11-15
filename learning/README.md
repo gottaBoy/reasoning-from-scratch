@@ -5,6 +5,9 @@
 **当前阶段：P1-01用户代码已通过，进入本地实战P1-02单头Attention。**
 查看 [统一注释模板](my_ops_template.py)，只在 `learning/my_ops.py` 中实现：
 保留RMSNorm/RoPE，新增causal_attention；模板本身保持未完成，便于复习。
+需要更直观的说明时，打开 [中文图解模板](my_ops_template_zh.py)：
+RMSNorm用调音台，RoPE用二维指针，Attention用问题查资料来解释，
+每个TODO都有中文、shape和手算；两版接口相同，任选一版读，不是两份作业。
 完整的文件职责、公式、边界和验收口径统一见
 [P1-02实战教程](../docs/PRACTICE_P1_02_ATTENTION.md)。
 Notebook只作逐格观察补充，不替代个人实现或验收记录。

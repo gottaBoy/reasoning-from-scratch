@@ -2,10 +2,14 @@
 
 本页是实现指导，不直接把你的练习替换成参考答案。
 配套文件：[可安全导入的模板](../learning/my_ops_template.py)、
+[中文图解版](../learning/my_ops_template_zh.py)、
 [实战Notebook](../learning/practice01_start.ipynb)。
 统一约定：`my_ops_template.py`集中各关接口与提示，保持未完成状态；
 你只在 `my_ops.py` 中逐步实现，不要用整个模板覆盖已有代码。
 模板目前含P1-01的RMSNorm/RoPE与P1-02的causal_attention，按任务分别验收。
+英文模板与中文图解版的接口、校验和TODO编号完全一致，任选一版阅读即可。
+中文版补充“调音台的总旋钮/通道旋钮”“不同转速的二维指针”、
+小数字手算及广播过程；比喻只帮助理解，计算仍以公式和shape为准。
 
 ## 1. 先分清“定义接口”和“调用接口”
 
