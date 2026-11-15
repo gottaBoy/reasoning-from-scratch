@@ -2,18 +2,22 @@
 
 用户已确认概念课程全部阅读，现进入本地实战。
 “已读完”是用户学习记录，不自动等于所有模块已独立实现或性能验收。
-当前关卡为 **P1-02：单头因果Attention计算核心**。
+当前关卡为 **P1-05：请求级 KV Cache**。
 P1-01的用户 `my_ops.py` 已通过本关支持范围的CPU/CUDA各14项检查，记录见
 [实战日志](LOCAL_PRACTICE_LOG.md)，不把该结果推广为所有输入或性能已验收。
-现在查看 [统一注释模板](../learning/my_ops_template.py) 的Attention部分，
-在已有的 `learning/my_ops.py` 中新增 `causal_attention`，不覆盖RMSNorm/RoPE。
+P1-02的 `causal_attention`、P1-03的拆头/合头和P1-04的KV head映射
+已完成支持范围内验收。
+现在查看 [Day 12教程](DAY12_REQUEST_CACHE.md)，使用小模型观察请求级Cache。
+P1-03的练习见 [拆头/合头实战教程](PRACTICE_P1_03_LAYOUT.md)；
+P1-04的具体练习见 [GQA实战教程](PRACTICE_P1_04_GQA.md) 和
+[GQA Notebook](../learning/practice04_gqa.ipynb)。
 模板保持未完成，个人实现始终使用同一文件；[P1-02教程](PRACTICE_P1_02_ATTENTION.md) 与
 [Notebook](../learning/practice02_attention.ipynb)作为可选补充。
 P1-01入口 [Norm/RoPE Notebook](../learning/practice01_start.ipynb) 保留作复习。
 模板另有 [中文图解版](../learning/my_ops_template_zh.py)，使用相同接口和TODO编号，
 用调音台、二维指针与查资料解释三个算子，任选一版阅读，个人实现仍只写 `my_ops.py`。
 
-本关验收必须显式选择任务：
+P1-02验收命令（复查时使用）：
 
 ```bash
 python -m learning.local_practice --task attention --device cpu --candidate learning/my_ops.py
@@ -22,7 +26,8 @@ python -m learning.local_practice --task attention --device cuda --candidate lea
 
 默认不传 `--task` 仍运行P1-01，避免改变既有命令含义。
 P1-01/P1-02按任务检查各自接口，共用 `my_ops.py`，未完成的新任务不阻塞已有任务。
-后续关卡的模板继续集中到 `my_ops_template.py`，不提前声称尚未接入的任务已能验收。
+P1-04已用 Day 11 Notebook 和标签张量观察，并通过 `--task gqa` 验收同一 candidate 文件。
+P1-05先做 `3+2+3` full/cached 对齐和两个请求的Cache隔离；当前没有新的candidate CLI。
 
 ## 1. 先做一个最小闭环
 
@@ -135,8 +140,8 @@ RoPE：
 | --- | --- | --- | --- |
 | P1-01 | RMSNorm/RoPE | 14项CPU→CUDA；错offset | [Day 8](DAY08_RMSNORM_ROPE.md) |
 | P1-02 | 单头Attention核心 | 14项CPU→CUDA、手算17.5、矩形Mask与梯度 | [实战](PRACTICE_P1_02_ATTENTION.md)、[Day 9](DAY09_SINGLE_ATTENTION.md) |
-| P1-03 | MHA拆头/合头 | T>1标签追踪；漏transpose | [Day 10](DAY10_MULTIHEAD.md) |
-| P1-04 | MQA/GQA参数化 | Hkv=1/2/4各自full/cached对齐 | [Day 11](DAY11_GQA_MQA.md) |
+| P1-03 | MHA拆头/合头 | T>1标签追踪；漏transpose | [实战](PRACTICE_P1_03_LAYOUT.md)、[Day 10](DAY10_MULTIHEAD.md) |
+| P1-04 | MQA/GQA参数化 | Hkv=1/2/4映射；紧凑KV不误扩展为Cache | [实战](PRACTICE_P1_04_GQA.md)、[Day 11](DAY11_GQA_MQA.md) |
 | P1-05 | 请求级KV Cache | 3+2+3、多步增长、上下文拒绝不污染 | [Day 12](DAY12_REQUEST_CACHE.md) |
 | P1-06 | Block/SwiGLU/LM输出 | 两次残差、loss/backward、全部梯度有限 | [Day 13](DAY13_BLOCK_BACKWARD.md) |
 | P1-07 | 模型基线 | 相同工作量、预热/同步、完整logits误差 | [Day 14](DAY14_MODEL_BASELINE.md) |
@@ -177,5 +182,5 @@ P1-01不要急着测ns级小算子的“加速比”；先交出CPU与CUDA正确
 
 本次实战开始和待填记录见 [实战日志](LOCAL_PRACTICE_LOG.md)。
 示例报告只是环境/参考/候选实现证据，不自动更新个人掌握程度。
-下一步最具体的动作：**看 `my_ops_template.py` 的A1–A5，在
-`learning/my_ops.py` 新增causal_attention，再用 `--task attention` 从CPU验收开始。**
+下一步最具体的动作：**打开 [Day 12教程](DAY12_REQUEST_CACHE.md)，
+先用 `learning/mini_transformer/model.py` 做 `3+2+3` 的 full/cached logits 对齐。**

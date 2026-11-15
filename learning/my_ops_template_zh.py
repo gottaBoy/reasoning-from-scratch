@@ -34,8 +34,10 @@ shape 表示张量各轴的长度；dtype 是数值类型，device 是 CPU 或 C
         --candidate learning/my_ops.py
     python -m learning.local_practice --task attention --device cpu \\
         --candidate learning/my_ops.py
+    python -m learning.local_practice --task layout --device cpu \\
+        --candidate learning/my_ops.py
 
-CPU 通过后，把 cpu 改成 cuda 再跑。两个任务共用 my_ops.py，分别检查各自接口。
+CPU 通过后，把 cpu 改成 cuda 再跑。三个任务共用 my_ops.py，分别检查各自接口。
 未传 --candidate 只是在测参考基线，不是验收你的代码。
 宿主机文件与 Jupyter 卷不是自动同步的，运行前确认你正在验收哪份文件。
 本模板不是生产算子，也不自动证明 GPU 性能、全部 dtype 支持或学习者已精通。
@@ -310,6 +312,53 @@ def causal_attention(q, k, v, start=0):
     token、patch、音频帧、视频时空 patch 只是“资料卡片”的不同载体；
     Value 不是原始文字、像素、声音或视频文件，而是模型内部的特征向量。
 
+    stride：索引走一步，底层storage要跳多少个元素？
+    ------------------------------------------------
+    shape 是“有多少箱/排/格”，stride 是“换箱/换排/换格时跳多远”。
+    其他索引不变时，第 i 条轴的索引加 1，storage元素编号增加 stride[i]。
+    它的单位是元素，不是字节，也不等于这条轴本身的长度。
+
+    默认连续行优先布局，shape=[2,3,4]：2箱，每箱3排，每排4格。
+        换一格：跳1个数                -> stride[2]=1
+        换一排：跳一整排4个数         -> stride[1]=4
+        换一箱：跳一整箱3*4=12个数    -> stride[0]=12
+    因此 stride=[12,4,1]；从右向左乘，是因为要跳过右侧的一整个块。
+    这只是默认连续布局的规则，转置/切片后不能仅凭shape照算。
+    stride不是模型学习的参数，通常由PyTorch在创建/转换布局时维护，.stride()读取实际结果。
+    大小为1的轴也不靠shape唯一决定stride；以实际 .stride() 为准。
+
+    对普通strided Tensor，元素寻址公式是：
+        storage_index = storage_offset + sum(index[i] * stride[i])
+        byte_address = storage_base_address + storage_index * element_size()
+    shape=[2,3,4]、stride=[12,4,1]、offset=0时：
+        x[1,2,3] -> 1*12 + 2*4 + 3*1 = storage第23号元素。
+    用FP32时一个元素4字节，第23号元素距离storage基址92字节。
+
+    用标签数验证多头拆合，不用猜：
+        base = torch.arange(24, dtype=torch.float32)
+        x = base.reshape(2,3,4)          # [B,T,H*D], stride=(12,4,1)
+        split = x.view(2,3,2,2)          # [B,T,H,D], stride=(12,4,2,1)
+        heads = split.transpose(1,2)     # [B,H,T,D], stride=(12,2,4,1)
+    拆头把4维解释成2个head、每头2维；转置只交换两轴的shape/stride。
+    heads[1,1,2,0] -> 1*12+1*2+2*4+0*1=22，值就是base[22]。
+    多维不神秘：每条轴只贡献“索引乘自己的跳距”，最后相加。
+
+    切片说明为什么还需要storage_offset：
+        tail = x[:,1:,:]                # shape=(2,2,4), stride=(12,4,1), offset=4
+    第一格值是base[4]；换batch仍跳12格，不是新shape右侧乘积8格。
+    tail和x共享storage，但tail.data_ptr()比x.data_ptr()晚4个FP32元素，即16字节。
+    data_ptr()指第一个逻辑元素，不一定是storage起始地址；
+    在这些非空普通张量里用 untyped_storage().data_ptr() 对比storage基址。
+
+    view不复制，要求新旧形状/stride兼容；非连续不等于一概不能view。
+    reshape兼容时返回view，不兼容时复制；不要假定必然共享storage。
+    contiguous按当前逻辑顺序生成连续布局，已符合格式时无需复制。
+    正确合头：heads.transpose(1,2).reshape(2,3,4)。
+    直接heads.reshape(2,3,4)会混错时间和head；先contiguous再直接reshape也不会修好语义。
+    切片base[::2]的stride为2；expand还可产生stride为0的轴，并非最后一个stride总是1。
+    完整货架图、Jupyter逐步实验与官方API见 docs/DAY10_MULTIHEAD.md 第2.1节。
+    本段只解释布局，不新增已完成算子；你的实现仍只放在my_ops.py。
+
     小数字：两份资料的内容是 10 和 20
     --------------------------------
     当前 Query 在绝对位置 1，K/V 位置是 0、1，都允许读取。
@@ -375,3 +424,64 @@ def causal_attention(q, k, v, start=0):
     # 保留梯度；不 detach，不进 no_grad，不原地修改输入，不导入参考实现代做。
     # 完成后按模板开头命令验收 my_ops.py，先 CPU，再 CUDA。
     raise NotImplementedError("Fill A1-A5 in your own implementation.")
+
+
+def split_heads(x, heads, head_dim):
+    """P1-03：把 [B,T,H×D] 拆成 [B,H,T,D]，只做布局操作。"""
+    if x.ndim != 3:
+        raise ValueError("Expected [B,T,H*D].")
+    if (not isinstance(heads, int) or isinstance(heads, bool) or heads < 1
+            or not isinstance(head_dim, int) or isinstance(head_dim, bool) or head_dim < 1):
+        raise ValueError("Positive integer heads and head_dim required.")
+    if x.shape[-1] != heads * head_dim:
+        raise ValueError("Last dimension must equal heads * head_dim.")
+    if x.dtype != torch.float32:
+        raise ValueError("This task requires FP32 input.")
+    if not x.is_contiguous():
+        raise ValueError("split_heads requires contiguous input.")
+
+    # TODO S1：view 成 [B,T,heads,head_dim]。
+    # 只是重新解释连续存储，不做 Linear 投影，不改变数值。
+
+    # TODO S2：交换 T 和 heads 轴，得到 [B,heads,T,head_dim]。
+    # 不要在这里 contiguous；先观察转置后的 stride。
+    raise NotImplementedError("Fill S1-S2 in your own implementation.")
+
+
+def merge_heads(heads):
+    """P1-03：把 [B,H,T,D] 合回 [B,T,H×D]，只做布局操作。"""
+    if heads.ndim != 4:
+        raise ValueError("Expected [B,H,T,D].")
+    if min(*heads.shape) < 1:
+        raise ValueError("Nonempty [B,H,T,D] input required.")
+    if heads.dtype != torch.float32:
+        raise ValueError("This task requires FP32 input.")
+
+    # TODO M1：先把 head 和 T 换回 [B,T,H,D]。
+    # 只有同一时间位置的多个 head 相邻，才可以安全合并最后两轴。
+
+    # TODO M2：reshape 最后 H、D 两轴 -> [B,T,H×D]。
+    # 直接对 [B,H,T,D] reshape 是故意保留的错误实验。
+    raise NotImplementedError("Fill M1-M2 in your own implementation.")
+
+
+def expand_kv_heads(kv, query_heads):
+    """P1-04：把紧凑 KV [B,H_kv,T,D] 扩展成 [B,H_q,T,D]。"""
+    if kv.ndim != 4:
+        raise ValueError("Expected [B,H_kv,T,D].")
+    if min(*kv.shape) < 1:
+        raise ValueError("Nonempty [B,H_kv,T,D] input required.")
+    if not isinstance(query_heads, int) or isinstance(query_heads, bool) or query_heads < 1:
+        raise ValueError("Positive integer query_heads required.")
+    if kv.dtype != torch.float32:
+        raise ValueError("This task requires FP32 input.")
+    if query_heads % kv.shape[1] != 0:
+        raise ValueError("query_heads must be divisible by kv_heads.")
+
+    # TODO G1：group_size = query_heads // kv.shape[1]。
+    # 一个紧凑 KV head 服务 group_size 个 Query heads。
+
+    # TODO G2：expanded = kv.repeat_interleave(group_size, dim=1)。
+    # 输出 [B,query_heads,T,D]；不修改紧凑 kv。
+    # 扩展是计算阶段的临时对齐，不代表 Cache 应保存扩展副本。
+    raise NotImplementedError("Fill G1-G2 in your own implementation.")

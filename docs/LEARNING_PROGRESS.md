@@ -1,20 +1,23 @@
 # 学习进度
 
 用户确认：**概念课程已全部阅读，进入本地实战**。
-当前关卡：**P1-02：单头因果Attention核心**（对应原Day 9的计算内容）。
-更新时间：2026-11-14（Asia/Singapore）。
+当前关卡：**P1-05：请求级 KV Cache**（对应原Day 12内容）。
+更新时间：2026-11-15（Asia/Seoul）。
 用户的my_ops.py已通过P1-01支持范围的CPU/CUDA验收；概念阅读、代码验收与性能仍分别记录。
 
 | 维度 | 状态 |
 | --- | --- |
-| 学习位置 | 本地实战P1-02，学习中 |
+| 学习位置 | 本地实战P1-05，学习中 |
 | 概念阅读 | 用户确认全部看完，不自动等于全部模块可独立实现 |
 | Day 1–4 | 已讲解并准备/验证实验，个人自测结果仍由学习者填写 |
 | Day 5 | 已完成本轮讲解，用户决定进入下一天；个人独立自测结果尚未登记 |
 | Day 6 | 本轮讲解与教程补充收尾，用户决定进入下一天；个人独立验收尚未登记 |
 | Day 7 | 本轮教程与实验已完成准备，个人独立验收尚未登记 |
 | Day 8实现内容 | 用户my_ops.py通过P1-01的CPU/CUDA各14项；报告与源码hash见实战日志 |
-| Day 9计算核心 | 当前P1-02，自己的单头Attention文件尚未验收 |
+| Day 9计算核心 | P1-02用户my_ops.py已通过CPU/CUDA各14项 |
+| Day 10布局 | P1-03用户my_ops.py已通过CPU/CUDA各10项 |
+| Day 11 GQA | P1-04用户my_ops.py已通过CPU/CUDA各10项 |
+| Day 12请求Cache | 当前P1-05，尚未实现/验收 |
 | Day 9–30实现内容 | 概念已读，参考材料已备齐；按实战关卡独立实现，Day 22真实服务仍未配置 |
 | 掌握程度 | 不因助手写完参考答案或测试通过而自动提升 |
 
@@ -40,18 +43,18 @@
   GB10提示保留，测试与执行记录详见 [验证报告](COURSE_VALIDATION.md)。
 - 上述历史补记未重复执行全部实验，当时保留Day 8位置；现在按用户新决定转入本地实战。
 
-## 当前：本地实战起步
+## 当前：P1-05请求级KV Cache
 
-先打开 [P1-02教程](PRACTICE_P1_02_ATTENTION.md) 和
-[Attention实战Notebook](../learning/practice02_attention.ipynb)：
-手算17.5 → 查看 [统一注释模板](../learning/my_ops_template.py) 中的A1–A5
-→ 在 `learning/my_ops.py` 新增causal_attention → CPU验收 → CUDA验收 → 故障注入。
+P1-02、P1-03、P1-04已完成定义范围内的CPU/CUDA验收。下一练习打开
+[Day 12教程](DAY12_REQUEST_CACHE.md)，使用现有 `learning/mini_transformer/model.py`
+观察请求级 `Cache`、历史 K/V 拼接、位置偏移和上下文预检查。
+先做 `3+2+3` 的单请求分块，对齐 full forward 与 cached logits；再做两个独立请求，
+验证历史不会串线，最后验证越界拒绝不污染旧Cache。
 各关模板集中放在 `my_ops_template.py`，保持未完成；你只在 `my_ops.py` 中实现，
-无需单独的Attention模板/实现文件。
-验收器：[local_practice.py](../learning/local_practice.py)，本关选择 `--task attention`。
-上一关RMSNorm/RoPE已通过定义范围内检查，在同一文件中新增函数，不覆盖已有实现。
+无需单独的Attention模板/实现文件。P1-04的报告与hash见实战日志。
+P1-05当前使用小模型和独立Cache实验，尚未接入新的candidate验收命令。
 未传candidate时只验证参考实现；传文件也不自动证明独立创作或精通。
-本关不需要重建镜像、下载模型或升级现有依赖，先不加入投影/RoPE/Cache管理。
+本阶段不需要重建镜像、下载模型或升级现有依赖，也不加入分页Cache或服务调度。
 
 ## Day 8 参考入口
 

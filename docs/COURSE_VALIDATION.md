@@ -453,6 +453,71 @@ RMSNorm调音台、RoPE二维指针、Attention问题与资料卡片，
 
 本轮不运行新的GPU性能实验，不将教学模板/验收器通过视为用户已完成Attention。
 
+## P1-02用户Attention验收
+
+2026-11-15（Asia/Seoul），读取宿主机最新 `learning/my_ops.py`，
+临时复制到容器路径后执行candidate验收，未覆盖Jupyter中的个人文件。
+
+- source_sha256：
+  `e26236d5fd6cc2541c3a155ed88fb562159ef1e82d32f32b20bd97dcd59ecda0`
+- CPU：**14 passed / 0 failed**
+- CUDA：**14 passed / 0 failed**
+- 报告：
+  `/workspace/logs/practice/p1-02-20261115T075605968599Z.json`
+  `/workspace/logs/practice/p1-02-20261115T075614104706Z.json`
+
+结果覆盖手算、因果Prefill、单Query和多Query cached矩形匹配、
+未来扰动、零Query均匀权重、输入不修改、梯度/SDPA对齐及非法输入。
+CUDA保留NVIDIA GB10 capability 12.1与PyTorch capability提示；
+这是定义范围内FP32功能验收，不是性能或全部dtype结论。
+当前学习关卡推进到P1-04 MHA/MQA/GQA KV head映射。
+
+## Day 10布局与stride补充
+
+2026-11-15（Asia/Singapore），按用户追问补充
+[Day 10第2.1节](DAY10_MULTIHEAD.md#tensor-stride)与中文统一模板的storage/stride讲解。
+定义和边界对照PyTorch 2.10官方stride、Storage、Tensor Views、view和expand文档；
+例子使用独立小型FP32标签张量，不加载模型或个人实现。
+
+- 四份相关测试合计 **31 passed**，包括新增7项布局测试。
+- 文档的7个Python代码块按原顺序执行通过，不只是检查语法。
+- 覆盖`[2,3,4]`默认连续stride、元素/字节寻址、拆头/转置、
+  切片offset/共享storage、非连续但可view、错误合头、expand零stride。
+- 中文模板去除文档字符串后仍与英文模板代码结构一致；Ruff与Git空白检查通过。
+- 选择性同步到现有Jupyter卷，变更前备份位于
+  `/workspace/logs/course-sync-backup/day10-stride-20261115T083916488970Z/`。
+
+未修改或同步个人 `my_ops.py`；本轮前后源码hash均为
+`e26236d5fd6cc2541c3a155ed88fb562159ef1e82d32f32b20bd97dcd59ecda0`。
+本轮结果是CPU教学代码验证，不是P1-03个人candidate通过或GPU性能数据。
+
+## P1-03拆头/合头实战入口
+
+2026-11-15（Asia/Singapore），新增统一candidate文件的布局练习：
+`split_heads：[B,T,H*D] -> [B,H,T,D]`，
+`merge_heads：[B,H,T,D] -> [B,T,H*D]`。
+验收器只覆盖view/transpose/reshape、stride、标签顺序、storage、梯度和边界，
+不加入Linear、Attention分数、RoPE、GQA或Cache。
+
+- P1-03 reference baseline CPU：**10 passed / 0 failed**。
+- 相关测试（P1-03、Day 10 stride、模板及前两关回归）：**37 passed**。
+- Ruff passed；`practice03_layout.ipynb` schema passed（5 cells）。
+- 新文件已同步到Jupyter，备份目录：
+  `/workspace/logs/course-sync-backup/p1-03-layout-20261115T103027636365Z/`。
+- 个人 `my_ops.py` 未修改；尚未导出`split_heads`/`merge_heads`，
+  不登记P1-03个人通过。
+
+## P1-04 GQA/MQA KV head映射入口
+
+新增 `expand_kv_heads：[B,H_kv,T,D] -> [B,H_q,T,D]` 练习、
+`--task gqa`、[P1-04教程](PRACTICE_P1_04_GQA.md)和Notebook。
+参考基线 CPU/CUDA 各 **10 passed / 0 failed**；
+相关前置、模板和GQA测试合计 **43 passed**，Ruff通过，
+`practice04_gqa.ipynb` schema通过（4 cells）。
+CUDA保留GB10 capability 12.1提示；本轮只验证映射、输入保护、
+临时扩展独立性、梯度和边界，不验证请求级Cache或性能。
+个人 `my_ops.py` 尚未实现`expand_kv_heads`，不登记P1-04通过。
+
 ## 原始记录
 
 已执行 Notebook 和分日实验报告保存在现有 volume 中，不加入 Git：
@@ -507,3 +572,25 @@ SKIP_EXPENSIVE=1 RUN_REAL_DOWNLOAD_TESTS=0 python -m pytest -q tests
 材料已具备可复现的学习与面试训练入口；当前行动见
 [学习进度](LEARNING_PROGRESS.md) 与 [本地实战日志](LOCAL_PRACTICE_LOG.md)，
 历史参考实验通过不自动替代个人验收。
+
+## P1-04用户GQA验收
+
+2026-11-15（Asia/Seoul），宿主机最新 `learning/my_ops.py` 临时复制到现有Spark容器
+执行candidate验收，未覆盖Jupyter中的个人文件。
+
+- `expand_kv_heads`实现紧凑KV到Query head的连续分组映射。
+- source_sha256：`4925df4cc13794e57dd4eca990e3e2332b4da7117b3e7c2e92c79078d3663468`
+- CPU：**10 passed / 0 failed**
+- CUDA：**10 passed / 0 failed**
+- P1-04相关前置、模板和GQA测试：**43 passed**
+
+报告路径：
+
+```text
+/workspace/logs/practice/p1-04-candidate-cpu-20261115-v1.json
+/workspace/logs/practice/p1-04-candidate-cuda-20261115-v1.json
+```
+
+CUDA报告保留NVIDIA GB10 capability `12.1`与PyTorch兼容性warning。
+本结果只覆盖FP32 head映射、输入保护、临时扩展独立性、梯度和边界，
+不代表请求级KV Cache、生产PagedAttention或性能验收。当前本地实战进入P1-05。

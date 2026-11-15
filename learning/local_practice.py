@@ -187,11 +187,18 @@ def write_report(report, path):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
-    parser.add_argument("--task", choices=("norm-rope", "attention"), default="norm-rope")
+    parser.add_argument(
+        "--task", choices=("norm-rope", "attention", "layout", "gqa"), default="norm-rope",
+    )
     parser.add_argument("--candidate", type=Path, help="Trusted standalone learner .py module.")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
-    practice = "P1-01" if args.task == "norm-rope" else "P1-02"
+    practice = {
+        "norm-rope": "P1-01",
+        "attention": "P1-02",
+        "layout": "P1-03",
+        "gqa": "P1-04",
+    }[args.task]
     output = args.output or Path("logs/practice") / (
         practice.lower() + "-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + ".json"
     )
@@ -201,6 +208,12 @@ def main(argv=None):
         if args.task == "attention":
             from learning.practice_attention import evaluate_attention
             report = evaluate_attention(args.device, args.candidate)
+        elif args.task == "layout":
+            from learning.practice_layout import evaluate_layout
+            report = evaluate_layout(args.device, args.candidate)
+        elif args.task == "gqa":
+            from learning.practice_gqa import evaluate_gqa
+            report = evaluate_gqa(args.device, args.candidate)
         else:
             report = evaluate(args.device, args.candidate)
     except Exception as error:

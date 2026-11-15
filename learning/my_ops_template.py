@@ -1,8 +1,10 @@
-"""Shared learner scaffold for P1-01 and P1-02, not completed implementations.
+"""Shared learner scaffold for P1-01 through P1-03, not completed implementations.
 
 Read the hints here; implement each operation in learning/my_ops.py.
 Keep this template unfinished and do not overwrite existing learner code.
-P1-01: RMSNorm and rope; P1-02: causal_attention.
+P1-01: RMSNorm and rope; P1-02: causal_attention;
+P1-03: split_heads and merge_heads.
+P1-04: expand_kv_heads.
 Chinese companion with the same interfaces and TODOs: learning/my_ops_template_zh.py.
 Chinese walkthroughs:
     docs/MY_OPS_IMPLEMENTATION.md
@@ -15,6 +17,8 @@ Inside the existing Jupyter Terminal:
     python -m learning.local_practice --task norm-rope --device cpu \\
         --candidate learning/my_ops.py
     python -m learning.local_practice --task attention --device cpu \\
+        --candidate learning/my_ops.py
+    python -m learning.local_practice --task layout --device cpu \\
         --candidate learning/my_ops.py
 
 After CPU acceptance, repeat with --device cuda. Each task checks only its
@@ -157,3 +161,63 @@ def causal_attention(q, k, v, start=0):
     # Preserve autograd: no detach(), no no_grad, no in-place input changes.
     # Do not replace your implementation with an import of the reference.
     raise NotImplementedError("Fill A1-A5 in your own implementation.")
+
+
+def split_heads(x, heads, head_dim):
+    """P1-03: [B,T,H*D] -> [B,H,T,D], layout only."""
+    if x.ndim != 3:
+        raise ValueError("Expected [B,T,H*D].")
+    if (not isinstance(heads, int) or isinstance(heads, bool) or heads < 1
+            or not isinstance(head_dim, int) or isinstance(head_dim, bool) or head_dim < 1):
+        raise ValueError("Positive integer heads and head_dim required.")
+    if x.shape[-1] != heads * head_dim:
+        raise ValueError("Last dimension must equal heads * head_dim.")
+    if x.dtype != torch.float32:
+        raise ValueError("This task requires FP32 input.")
+    if not x.is_contiguous():
+        raise ValueError("split_heads requires contiguous input.")
+
+    # TODO S1: view x as [B,T,heads,head_dim].
+    # This only reinterprets contiguous storage; it does not calculate a projection.
+
+    # TODO S2: transpose the T and heads axes -> [B,heads,T,head_dim].
+    # Keep the resulting stride visible; do not call contiguous here.
+    raise NotImplementedError("Fill S1-S2 in your own implementation.")
+
+
+def merge_heads(heads):
+    """P1-03: [B,H,T,D] -> [B,T,H*D], layout only."""
+    if heads.ndim != 4:
+        raise ValueError("Expected [B,H,T,D].")
+    if min(*heads.shape) < 1:
+        raise ValueError("Nonempty [B,H,T,D] input required.")
+    if heads.dtype != torch.float32:
+        raise ValueError("This task requires FP32 input.")
+
+    # TODO M1: transpose heads axes back -> [B,T,H,D].
+    # The head dimension must become adjacent to D before flattening.
+
+    # TODO M2: reshape the final H,D axes -> [B,T,H*D].
+    # Use reshape after the transpose; direct reshape on [B,H,T,D] is the bug exercise.
+    raise NotImplementedError("Fill M1-M2 in your own implementation.")
+
+
+def expand_kv_heads(kv, query_heads):
+    """P1-04: compact [B,H_kv,T,D] -> query-aligned [B,H_q,T,D]."""
+    if kv.ndim != 4:
+        raise ValueError("Expected [B,H_kv,T,D].")
+    if min(*kv.shape) < 1:
+        raise ValueError("Nonempty [B,H_kv,T,D] input required.")
+    if not isinstance(query_heads, int) or isinstance(query_heads, bool) or query_heads < 1:
+        raise ValueError("Positive integer query_heads required.")
+    if kv.dtype != torch.float32:
+        raise ValueError("This task requires FP32 input.")
+    if query_heads % kv.shape[1] != 0:
+        raise ValueError("query_heads must be divisible by kv_heads.")
+
+    # TODO G1: group_size = query_heads // kv.shape[1].
+    # One compact KV head serves group_size Query heads.
+
+    # TODO G2: expanded = kv.repeat_interleave(group_size, dim=1).
+    # Output shape: [B,query_heads,T,D]. Do not change or mutate compact kv.
+    raise NotImplementedError("Fill G1-G2 in your own implementation.")

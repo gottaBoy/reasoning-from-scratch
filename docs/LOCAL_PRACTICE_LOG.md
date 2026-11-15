@@ -2,7 +2,7 @@
 
 开始日期：2026-11-08（America/New_York）。
 用户确认：概念课程全部阅读，转入本地实战。
-当前关卡：**P1-02，单头因果Attention计算核心**。
+当前关卡：**P1-05，请求级 KV Cache**。
 教程：[本地反复练习路线](LOCAL_PRACTICE.md)。
 
 ## 当前状态
@@ -14,7 +14,10 @@
 | 验收入口 | `python -m learning.local_practice --task attention`；默认任务仍为norm-rope，可传自己的candidate文件 |
 | 参考CPU/CUDA基线 | 本次均14/14通过，implementation_role为reference_baseline |
 | P1-01用户candidate | `/workspace/learning/my_ops.py`，支持范围内CPU/CUDA均14/14通过 |
-| P1-02用户candidate | 已约定使用 `/workspace/learning/my_ops.py`；causal_attention仍待实现/验收 |
+| P1-02用户candidate | `/workspace/learning/my_ops.py`，CPU/CUDA各14/14通过 |
+| P1-03用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
+| P1-04用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
+| P1-05用户candidate | 尚未开始；先验证现有小模型的请求级Cache契约 |
 | 后续模型/算子/引擎/服务 | 按关卡推进，未自动通过；真实vLLM仍未配置 |
 
 ## 已执行的参考证据
@@ -174,6 +177,88 @@ reshape或原地修改；个人实现文件不改动。
 以及视觉双向Mask、流式音频因果Mask、视频时空Mask不能互相默认替换。
 这些是理解特征向量的类比，不把Value误说成原始文字/像素/音频/视频文件。
 
+## P1-02用户文件验收：2026-11-15（Asia/Seoul）
+
+宿主机最新 `learning/my_ops.py` 临时复制到容器 `/tmp` 验收，未覆盖Jupyter卷中的个人文件。
+源码hash：
+
+```text
+e26236d5fd6cc2541c3a155ed88fb562159ef1e82d32f32b20bd97dcd59ecda0
+```
+
+结果：
+
+```text
+CPU：14 passed / 0 failed
+CUDA：14 passed / 0 failed
+```
+
+报告：
+
+```text
+/workspace/logs/practice/p1-02-20261115T075605968599Z.json
+/workspace/logs/practice/p1-02-20261115T075614104706Z.json
+```
+
+覆盖手算17.5、Prefill、单token Decode、矩形历史匹配、未来扰动、
+均匀权重、输入不修改、Q/K/V梯度、SDPA对齐和非法输入拒绝。
+CUDA运行保留GB10 capability `12.1` 与当前PyTorch提示的兼容性warning；
+本结果是FP32功能验收，不是生产kernel性能或所有dtype证明。
+
+因此P1-02已完成支持范围内验收，当前进入P1-03：
+多头Attention的投影后拆头、各头独立计算、换轴后合头和输出投影。
+
+## 2026-11-15：P1-03的stride与存储布局讲解
+
+用户要求记录投影、arange、view、reshape、transpose，并进一步解释stride如何确定。
+新增 [Day 10第2.1节](DAY10_MULTIHEAD.md#tensor-stride)，同步补入中文统一模板：
+
+- 用2箱、每箱3排、每排4格的目录，解释stride是某轴索引加1时的元素寻址距离。
+- 推导默认连续布局的`[12,4,1]`，强调不能由任意Tensor的shape唯一确定stride。
+- 用`storage_offset + Σ(index*stride)`手算寻址，区分元素编号和字节地址。
+- 验证拆头、转置、切片offset、共享storage但不同data_ptr、步长切片及错误直接合头。
+- 纠正“非连续一定不能view”“data_ptr不同就不共享”“contiguous可以修好合头语义”等误解。
+- 保留投影与布局操作的区分：Linear做乘加，view/transpose不产生新特征。
+
+本轮只补教学内容，个人文件未改动，也不登记P1-03用户实现通过。
+
+## P1-03实战入口：拆头与合头
+
+已新增 [P1-03实战教程](PRACTICE_P1_03_LAYOUT.md)、
+[布局Notebook](../learning/practice03_layout.ipynb)、
+`learning/practice_layout.py` 和 `--task layout` 验收入口。
+个人需要在 `my_ops.py` 中实现：
+
+```text
+split_heads：[B,T,H*D] -> [B,H,T,D]
+merge_heads：[B,H,T,D] -> [B,T,H*D]
+```
+
+当前只验证布局、标签顺序、stride、storage、梯度和边界；
+不加入Linear投影、Attention分数、RoPE、GQA或Cache。
+
+参考基线 CPU 验收：**10 passed / 0 failed**。
+相关测试（P1-03、Day 10 stride、模板、P1-01/P1-02回归）：
+**37 passed**；Ruff和Notebook schema检查通过。
+这不是用户candidate通过。当前 `my_ops.py` 尚未导出
+`split_heads`/`merge_heads`，下一步仍是在该文件中按S1-S2/M1-M2实现，
+再执行：
+
+```bash
+python -m learning.local_practice --task layout --device cpu \
+  --candidate learning/my_ops.py
+```
+
+验证：现有Spark容器内四份相关测试合计 **31 passed**，其中新增7项布局测试，
+覆盖连续stride/字节寻址、拆头/转置、切片offset与共享storage、
+非连续但可view、错误直接合头、expand零stride，以及按顺序执行教程Python代码。
+Ruff、宿主机语法编译和Git空白检查通过。
+本轮是CPU教学验证，未新增GPU计时或个人多头实现验收。
+教学文件已选择性同步到Jupyter，原文件备份于
+`/workspace/logs/course-sync-backup/day10-stride-20261115T083916488970Z/`。
+个人文件本轮前后hash均为
+`e26236d5fd6cc2541c3a155ed88fb562159ef1e82d32f32b20bd97dcd59ecda0`。
+
 ## 每轮填写
 
 ```text
@@ -193,3 +278,70 @@ CUDA报告：
 ```
 
 每轮使用新报告文件；未通过项保留失败记录，不以删除case或放宽阈值制造通过。
+## P1-03用户文件验收：2026-11-15（Asia/Seoul）
+
+宿主机最新 `learning/my_ops.py` 临时复制到容器 `/tmp` 验收，未覆盖Jupyter个人文件。
+源码hash：
+
+```text
+1d3f5f58cb1cff3a74e8c1d42a8064f58ff55c86a02c3bd8d224eb16ee824113
+```
+
+结果：
+
+```text
+CPU：10 passed / 0 failed
+CUDA：10 passed / 0 failed
+```
+
+报告：
+
+```text
+/workspace/logs/practice/p1-03-20261115T105701123214Z.json
+/workspace/logs/practice/p1-03-20261115T105757872014Z.json
+```
+
+覆盖拆头shape/stride、标签顺序、合头往返、非方形shape、
+storage/contiguous、梯度和非法输入。CUDA保留GB10 capability提示；
+这是布局功能验收，不是多头模型质量或性能结论。
+
+## P1-04实战入口：MHA/MQA/GQA KV head映射
+
+已新增 [P1-04实战教程](PRACTICE_P1_04_GQA.md)、
+[GQA Notebook](../learning/practice04_gqa.ipynb)、
+`learning/practice_gqa.py` 和 `--task gqa` 验收入口。
+个人需要在 `my_ops.py` 中实现：
+
+```text
+expand_kv_heads：[B,H_kv,T,D] -> [B,H_q,T,D]
+```
+
+参考基线 CPU/CUDA：各 **10 passed / 0 failed**；相关前置与GQA测试合计
+**43 passed**，Ruff通过，`practice04_gqa.ipynb` schema通过（4 cells）。
+CUDA保留GB10 capability提示；这是参考链路验证，不是个人candidate通过。
+当前只验证head映射、紧凑输入不修改、临时扩展独立、梯度和边界，
+不验证请求级Cache或生产性能。
+
+## P1-04用户文件验收：2026-11-15（Asia/Seoul）
+
+宿主机最新 `learning/my_ops.py` 临时复制到容器 `/tmp` 验收，未覆盖Jupyter中的个人文件。
+`expand_kv_heads`按 `group_size = H_q // H_kv` 和
+`repeat_interleave(group_size, dim=1)`实现，保留紧凑KV输入并生成独立扩展。
+
+- source_sha256：
+  `4925df4cc13794e57dd4eca990e3e2332b4da7117b3e7c2e92c79078d3663468`
+- CPU：**10 passed / 0 failed**
+- CUDA：**10 passed / 0 failed**
+- 相关回归：**43 passed / 0 failed**
+
+报告：
+
+```text
+/workspace/logs/practice/p1-04-candidate-cpu-20261115-v1.json
+/workspace/logs/practice/p1-04-candidate-cuda-20261115-v1.json
+```
+
+覆盖MHA/GQA/MQA映射、非方形shape、输入不修改、扩展副本独立、
+紧凑KV梯度和非法head数。CUDA保留NVIDIA GB10 capability `12.1`
+与PyTorch兼容性提示；这是FP32功能验收，不是生产Cache布局或性能结论。
+P1-04完成后进入P1-05：请求级KV Cache的多步增长、请求隔离和越界保护。

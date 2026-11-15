@@ -2,7 +2,7 @@
 
 这里保存 30 天学习过程中的可复现实验和小型实现。
 
-**当前阶段：P1-01用户代码已通过，进入本地实战P1-02单头Attention。**
+**当前阶段：P1-04用户代码已通过，进入本地实战P1-05 请求级 KV Cache。**
 查看 [统一注释模板](my_ops_template.py)，只在 `learning/my_ops.py` 中实现：
 保留RMSNorm/RoPE，新增causal_attention；模板本身保持未完成，便于复习。
 需要更直观的说明时，打开 [中文图解模板](my_ops_template_zh.py)：
@@ -27,6 +27,8 @@ Day 9–30的详细教程、实验入口和个人记录模板见
 | --- | --- |
 | 本地实战P1-01 | `practice01_start.ipynb`、`local_practice.py`；CPU先对齐，之后明确请求CUDA |
 | 本地实战P1-02 | `my_ops_template.py`的A1–A5、自己的`my_ops.py`、`practice02_attention.ipynb`、`practice_attention.py` |
+| 本地实战P1-03 | `my_ops_template.py`的S1–S2/M1–M2、自己的`my_ops.py`、`practice03_layout.ipynb`、`practice_layout.py` |
+| 本地实战P1-04 | `my_ops_template.py`的G1–G2、自己的`my_ops.py`、`practice04_gqa.ipynb`、`practice_gqa.py` |
 | Day 3 | `day03_debug.ipynb`、`day03_shapes.py` |
 | Day 3 RoPE/SwiGLU | `day03_rope_swiglu.ipynb` |
 | Day 4 | `day04_kv_cache.ipynb`、`day04_cache.py` |
