@@ -29,6 +29,7 @@ Day 9–30的详细教程、实验入口和个人记录模板见
 | 本地实战P1-02 | `my_ops_template.py`的A1–A5、自己的`my_ops.py`、`practice02_attention.ipynb`、`practice_attention.py` |
 | 本地实战P1-03 | `my_ops_template.py`的S1–S2/M1–M2、自己的`my_ops.py`、`practice03_layout.ipynb`、`practice_layout.py` |
 | 本地实战P1-04 | `my_ops_template.py`的G1–G2、自己的`my_ops.py`、`practice04_gqa.ipynb`、`practice_gqa.py` |
+| 本地实战P1-05 | `PRACTICE_P1_05_CACHE.md`、自己的Cache模块、`practice_cache.py`、`--task cache` |
 | Day 3 | `day03_debug.ipynb`、`day03_shapes.py` |
 | Day 3 RoPE/SwiGLU | `day03_rope_swiglu.ipynb` |
 | Day 4 | `day04_kv_cache.ipynb`、`day04_cache.py` |

@@ -594,3 +594,25 @@ SKIP_EXPENSIVE=1 RUN_REAL_DOWNLOAD_TESTS=0 python -m pytest -q tests
 CUDA报告保留NVIDIA GB10 capability `12.1`与PyTorch兼容性warning。
 本结果只覆盖FP32 head映射、输入保护、临时扩展独立性、梯度和边界，
 不代表请求级KV Cache、生产PagedAttention或性能验收。当前本地实战进入P1-05。
+
+## P1-05请求级Cache参考验收
+
+2026-11-15（Asia/Seoul），新增独立 `--task cache` 参考验收入口，
+使用 `learning/mini_transformer/model.py` 验证请求级状态契约。
+
+- CPU：**7 passed / 0 failed**
+- CUDA：**7 passed / 0 failed**
+- 相关回归（P1-05、P1-04、P1-03、Day 10、模板及前两关）：**45 passed**
+- CPU最大绝对误差：`1.19e-7`
+- CUDA最大绝对误差：`2.38e-7`
+
+报告路径：
+
+```text
+/workspace/logs/practice/p1-05-reference-cpu-20261115-v1.json
+/workspace/logs/practice/p1-05-reference-cuda-20261115-v1.json
+```
+
+覆盖 `3+2+3` 与 `5+1+1+1` 多步增长、逐层长度、请求隔离、
+上下文拒绝不污染、batch边界和因果前缀。CUDA报告保留GB10 capability
+`12.1`与PyTorch兼容性warning。这是参考基线，不是个人Cache模块通过。

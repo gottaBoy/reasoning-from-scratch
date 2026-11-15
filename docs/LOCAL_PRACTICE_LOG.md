@@ -17,7 +17,7 @@
 | P1-02用户candidate | `/workspace/learning/my_ops.py`，CPU/CUDA各14/14通过 |
 | P1-03用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
 | P1-04用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
-| P1-05用户candidate | 尚未开始；先验证现有小模型的请求级Cache契约 |
+| P1-05用户candidate | 尚未实现；参考入口CPU/CUDA各7/7通过 |
 | 后续模型/算子/引擎/服务 | 按关卡推进，未自动通过；真实vLLM仍未配置 |
 
 ## 已执行的参考证据
@@ -345,3 +345,41 @@ CUDA保留GB10 capability提示；这是参考链路验证，不是个人candida
 紧凑KV梯度和非法head数。CUDA保留NVIDIA GB10 capability `12.1`
 与PyTorch兼容性提示；这是FP32功能验收，不是生产Cache布局或性能结论。
 P1-04完成后进入P1-05：请求级KV Cache的多步增长、请求隔离和越界保护。
+
+## P1-05概念对齐：文本、图像、音频、视频
+
+2026-11-15（Asia/Seoul），用户要求用四种模态重新解释请求级Cache。
+统一结论是：Cache保存模型投影后的K/V特征，不保存原始文本、像素、音频或视频文件。
+
+| 模态 | 序列单位 | 追加内容 |
+| --- | --- | --- |
+| 文本 | token | 新 token |
+| 图像 | patch/token | 新 patch 或生成 token |
+| 音频 | 时间帧 | 新音频帧 |
+| 视频 | 时空 patch/token | 新视频帧 |
+
+四种模态都适用 `3+2+3` 的长度演化：`3 → 5 → 8`；每个请求独立持有
+Cache，模型权重可以共享。超长输入必须在修改旧Cache之前拒绝。
+普通双向图像/视频编码器不自动等同于因果Cache；此处范围是流式模型或自回归解码器。
+
+## P1-05参考验收入口：请求级KV Cache
+
+新增 [P1-05实战教程](PRACTICE_P1_05_CACHE.md)、`learning/practice_cache.py`
+和 `--task cache`。参考实现使用 `learning/mini_transformer/model.py`；
+个人candidate需要导出 `Cache`、`Config`、`Model`，不会把参考文件当作个人通过证据。
+
+- CPU：**7 passed / 0 failed**
+- CUDA：**7 passed / 0 failed**
+- 相关回归：**45 passed / 0 failed**
+
+报告：
+
+```text
+/workspace/logs/practice/p1-05-reference-cpu-20261115-v1.json
+/workspace/logs/practice/p1-05-reference-cuda-20261115-v1.json
+```
+
+覆盖 `3+2+3`、`5+1+1+1`、逐层长度一致、两个请求隔离、
+上下文拒绝前不修改Cache、batch不一致拒绝和因果前缀稳定性。
+CPU最大绝对误差为 `1.19e-7`，CUDA最大绝对误差为 `2.38e-7`；
+CUDA保留NVIDIA GB10 capability `12.1`提示。

@@ -27,7 +27,8 @@ python -m learning.local_practice --task attention --device cuda --candidate lea
 默认不传 `--task` 仍运行P1-01，避免改变既有命令含义。
 P1-01/P1-02按任务检查各自接口，共用 `my_ops.py`，未完成的新任务不阻塞已有任务。
 P1-04已用 Day 11 Notebook 和标签张量观察，并通过 `--task gqa` 验收同一 candidate 文件。
-P1-05先做 `3+2+3` full/cached 对齐和两个请求的Cache隔离；当前没有新的candidate CLI。
+P1-05先做 `3+2+3` full/cached 对齐和两个请求的Cache隔离；
+参考入口为 `--task cache`，个人实现可通过 `--candidate` 加载独立模块。
 
 ## 1. 先做一个最小闭环
 
@@ -142,7 +143,7 @@ RoPE：
 | P1-02 | 单头Attention核心 | 14项CPU→CUDA、手算17.5、矩形Mask与梯度 | [实战](PRACTICE_P1_02_ATTENTION.md)、[Day 9](DAY09_SINGLE_ATTENTION.md) |
 | P1-03 | MHA拆头/合头 | T>1标签追踪；漏transpose | [实战](PRACTICE_P1_03_LAYOUT.md)、[Day 10](DAY10_MULTIHEAD.md) |
 | P1-04 | MQA/GQA参数化 | Hkv=1/2/4映射；紧凑KV不误扩展为Cache | [实战](PRACTICE_P1_04_GQA.md)、[Day 11](DAY11_GQA_MQA.md) |
-| P1-05 | 请求级KV Cache | 3+2+3、多步增长、上下文拒绝不污染 | [Day 12](DAY12_REQUEST_CACHE.md) |
+| P1-05 | 请求级KV Cache | 3+2+3、多步增长、上下文拒绝不污染 | [实战](PRACTICE_P1_05_CACHE.md)、[Day 12](DAY12_REQUEST_CACHE.md) |
 | P1-06 | Block/SwiGLU/LM输出 | 两次残差、loss/backward、全部梯度有限 | [Day 13](DAY13_BLOCK_BACKWARD.md) |
 | P1-07 | 模型基线 | 相同工作量、预热/同步、完整logits误差 | [Day 14](DAY14_MODEL_BASELINE.md) |
 | P2-01 | CUDA Vector Add | N=255/256/257；尾部越界检查 | [Day 15](DAY15_CUDA_INDEXING.md) |
@@ -182,5 +183,5 @@ P1-01不要急着测ns级小算子的“加速比”；先交出CPU与CUDA正确
 
 本次实战开始和待填记录见 [实战日志](LOCAL_PRACTICE_LOG.md)。
 示例报告只是环境/参考/候选实现证据，不自动更新个人掌握程度。
-下一步最具体的动作：**打开 [Day 12教程](DAY12_REQUEST_CACHE.md)，
-先用 `learning/mini_transformer/model.py` 做 `3+2+3` 的 full/cached logits 对齐。**
+下一步最具体的动作：**打开 [P1-05实战教程](PRACTICE_P1_05_CACHE.md)，
+先运行 `--task cache --device cpu`，再准备自己的 `learning/my_cache.py`。**

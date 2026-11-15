@@ -188,7 +188,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
     parser.add_argument(
-        "--task", choices=("norm-rope", "attention", "layout", "gqa"), default="norm-rope",
+        "--task", choices=("norm-rope", "attention", "layout", "gqa", "cache"),
+        default="norm-rope",
     )
     parser.add_argument("--candidate", type=Path, help="Trusted standalone learner .py module.")
     parser.add_argument("--output", type=Path)
@@ -198,6 +199,7 @@ def main(argv=None):
         "attention": "P1-02",
         "layout": "P1-03",
         "gqa": "P1-04",
+        "cache": "P1-05",
     }[args.task]
     output = args.output or Path("logs/practice") / (
         practice.lower() + "-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + ".json"
@@ -214,6 +216,9 @@ def main(argv=None):
         elif args.task == "gqa":
             from learning.practice_gqa import evaluate_gqa
             report = evaluate_gqa(args.device, args.candidate)
+        elif args.task == "cache":
+            from learning.practice_cache import evaluate_cache
+            report = evaluate_cache(args.device, args.candidate)
         else:
             report = evaluate(args.device, args.candidate)
     except Exception as error:
