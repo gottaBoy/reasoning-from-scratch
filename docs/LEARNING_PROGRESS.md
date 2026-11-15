@@ -49,7 +49,7 @@
 P1-02、P1-03、P1-04、P1-05已完成定义范围内的CPU/CUDA验收。下一练习打开
 [Day 13教程](DAY13_BLOCK_BACKWARD.md)，检查
 `x + Attention(norm1(x))`、`x1 + FFN(norm2(x1))`、SwiGLU门控、
-LM head 输出和有限梯度。
+LM head 输出和有限梯度；对应的参考入口是 `--task block`。
 先做 `3+2+3` 的单请求分块，对齐 full forward 与 cached logits；再做两个独立请求，
 验证历史不会串线，最后验证越界拒绝不污染旧Cache。
 各关模板集中放在 `my_ops_template.py`，保持未完成；你只在 `my_ops.py` 中实现，

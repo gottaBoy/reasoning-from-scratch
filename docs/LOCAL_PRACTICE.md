@@ -28,7 +28,8 @@ python -m learning.local_practice --task attention --device cuda --candidate lea
 P1-01/P1-02按任务检查各自接口，共用 `my_ops.py`，未完成的新任务不阻塞已有任务。
 P1-04已用 Day 11 Notebook 和标签张量观察，并通过 `--task gqa` 验收同一 candidate 文件。
 P1-05已通过 `--task cache` 的个人candidate验收。
-P1-06暂时使用 `learning/mini_transformer/model.py` 和 Day 13 课程入口。
+P1-06使用 [Block/SwiGLU实战教程](PRACTICE_P1_06_BLOCK.md) 和
+`--task block` 验收入口。
 
 ## 1. 先做一个最小闭环
 
@@ -144,7 +145,7 @@ RoPE：
 | P1-03 | MHA拆头/合头 | T>1标签追踪；漏transpose | [实战](PRACTICE_P1_03_LAYOUT.md)、[Day 10](DAY10_MULTIHEAD.md) |
 | P1-04 | MQA/GQA参数化 | Hkv=1/2/4映射；紧凑KV不误扩展为Cache | [实战](PRACTICE_P1_04_GQA.md)、[Day 11](DAY11_GQA_MQA.md) |
 | P1-05 | 请求级KV Cache | 3+2+3、多步增长、上下文拒绝不污染 | [实战](PRACTICE_P1_05_CACHE.md)、[Day 12](DAY12_REQUEST_CACHE.md) |
-| P1-06 | Block/SwiGLU/LM输出 | 两次残差、loss/backward、全部梯度有限 | [Day 13](DAY13_BLOCK_BACKWARD.md) |
+| P1-06 | Block/SwiGLU/LM输出 | 两次残差、loss/backward、全部梯度有限 | [实战](PRACTICE_P1_06_BLOCK.md)、[Day 13](DAY13_BLOCK_BACKWARD.md) |
 | P1-07 | 模型基线 | 相同工作量、预热/同步、完整logits误差 | [Day 14](DAY14_MODEL_BASELINE.md) |
 | P2-01 | CUDA Vector Add | N=255/256/257；尾部越界检查 | [Day 15](DAY15_CUDA_INDEXING.md) |
 | P2-02 | Shared Reduction | 无效线程仍同步；partial独立参考 | [Day 16](DAY16_SHARED_REDUCTION.md) |

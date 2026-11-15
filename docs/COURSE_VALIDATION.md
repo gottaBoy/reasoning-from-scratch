@@ -638,3 +638,24 @@ CUDA报告保留NVIDIA GB10 capability `12.1`与PyTorch兼容性warning。
 修正后全部通过。结果覆盖 `3+2+3`、`5+1+1+1`、请求隔离、上下文拒绝前不修改、
 batch拒绝及因果前缀。CUDA报告保留GB10 capability `12.1`与兼容性warning。
 当前本地实战进入P1-06。
+
+## P1-06 Block/SwiGLU参考验收
+
+2026-11-15（Asia/Seoul），新增 `--task block` 参考验收入口，
+使用无Cache的小型Transformer检查Block和反向传播契约。
+
+- CPU：**6 passed / 0 failed**
+- CUDA：**6 passed / 0 failed**
+- 相关回归：**47 passed**
+
+报告路径：
+
+```text
+/workspace/logs/practice/p1-06-reference-cpu-20261115-v2.json
+/workspace/logs/practice/p1-06-reference-cuda-20261115-v2.json
+```
+
+覆盖 `10 → 12 → 15` 两次残差、SwiGLU 三线性层、FFN梯度、
+LM logits shape、全参数 cross-entropy backward 和 `eval()` 不关闭 autograd。
+CUDA报告保留GB10 capability `12.1`与兼容性warning；这是参考基线，
+不是个人实现或训练收敛验收。

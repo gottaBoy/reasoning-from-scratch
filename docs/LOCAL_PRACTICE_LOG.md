@@ -407,3 +407,23 @@ CUDA保留NVIDIA GB10 capability `12.1`提示。
 覆盖多步 full/cached 对齐、请求隔离、逐层长度、上下文拒绝不污染、
 batch边界和因果前缀稳定性。CUDA保留GB10 capability `12.1`提示。
 P1-05完成后进入P1-06：Transformer Block、SwiGLU、LM输出与梯度。
+
+## P1-06参考验收入口：Block/SwiGLU/LM输出
+
+新增 [P1-06实战教程](PRACTICE_P1_06_BLOCK.md)、`learning/practice_block.py`
+和 `--task block`。参考验收使用无Cache的小型Transformer，覆盖残差顺序、
+SwiGLU公式、有限梯度和 `eval()`/autograd边界。
+
+- CPU：**6 passed / 0 failed**
+- CUDA：**6 passed / 0 failed**
+- 相关回归：**47 passed / 0 failed**
+
+报告：
+
+```text
+/workspace/logs/practice/p1-06-reference-cpu-20261115-v2.json
+/workspace/logs/practice/p1-06-reference-cuda-20261115-v2.json
+```
+
+CUDA保留NVIDIA GB10 capability `12.1`提示；这是参考基线，
+不代表个人Block/SwiGLU实现或训练收敛。
