@@ -2,7 +2,7 @@
 
 开始日期：2026-11-08（America/New_York）。
 用户确认：概念课程全部阅读，转入本地实战。
-当前关卡：**P1-06，Transformer Block、SwiGLU 与 LM 输出**。
+当前关卡：**P1-07，模型基线与 full/cached 对齐**。
 教程：[本地反复练习路线](LOCAL_PRACTICE.md)。
 
 ## 当前状态
@@ -18,7 +18,8 @@
 | P1-03用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
 | P1-04用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
 | P1-05用户candidate | 同一 `/workspace/learning/my_cache.py`，CPU/CUDA各7/7通过 |
-| P1-06用户candidate | 尚未实现；先验证Block/SwiGLU和梯度契约 |
+| P1-06用户candidate | 同一 `/workspace/learning/my_block.py`，CPU/CUDA各6/6通过 |
+| P1-07用户candidate | 尚未实现；先固定权重和工作量做full/cached基线 |
 | 后续模型/算子/引擎/服务 | 按关卡推进，未自动通过；真实vLLM仍未配置 |
 
 ## 已执行的参考证据
@@ -427,3 +428,26 @@ SwiGLU公式、有限梯度和 `eval()`/autograd边界。
 
 CUDA保留NVIDIA GB10 capability `12.1`提示；这是参考基线，
 不代表个人Block/SwiGLU实现或训练收敛。
+
+## P1-06用户文件验收：2026-11-16（Asia/Seoul）
+
+个人候选文件为 `learning/my_block.py`，复用参考 Attention，
+独立实现 FFN/SwiGLU 和 Block 的两次 residual。
+
+- source_sha256：
+  `8dca8d24e7ec473273adacaa32789084a69ac2aa46f57144779c91c26438ae6d`
+- CPU：**6 passed / 0 failed**
+- CUDA：**6 passed / 0 failed**
+
+报告：
+
+```text
+/workspace/logs/practice/p1-06-candidate-cpu-20261116-v2.json
+/workspace/logs/practice/p1-06-candidate-cuda-20261116-v2.json
+```
+
+检查覆盖SwiGLU三线性层、`10 → 12 → 15` residual顺序、
+FFN和全模型梯度、LM logits shape及 `eval()` 不关闭autograd。
+最初发现配置字段名与仓库 `Config` 不一致，改为 `width`/`hidden`
+并使用RMSNorm默认epsilon后通过。CUDA保留GB10 capability `12.1`提示。
+P1-06完成后进入P1-07：模型基线与full/cached对齐。

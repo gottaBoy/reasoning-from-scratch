@@ -2,12 +2,12 @@
 
 用户已确认概念课程全部阅读，现进入本地实战。
 “已读完”是用户学习记录，不自动等于所有模块已独立实现或性能验收。
-当前关卡为 **P1-06：Transformer Block、SwiGLU 与 LM 输出**。
+当前关卡为 **P1-07：模型基线与 full/cached 对齐**。
 P1-01的用户 `my_ops.py` 已通过本关支持范围的CPU/CUDA各14项检查，记录见
 [实战日志](LOCAL_PRACTICE_LOG.md)，不把该结果推广为所有输入或性能已验收。
-P1-02的 `causal_attention`、P1-03的拆头/合头、P1-04的KV head映射和
-P1-05的请求级Cache已完成支持范围内验收。
-现在查看 [Day 13教程](DAY13_BLOCK_BACKWARD.md)，继续检查Block和梯度。
+P1-02的 `causal_attention`、P1-03的拆头/合头、P1-04的KV head映射、
+P1-05的请求级Cache和P1-06的Block/SwiGLU已完成支持范围内验收。
+现在查看 [Day 14教程](DAY14_MODEL_BASELINE.md)，固定工作量比较模型基线。
 P1-03的练习见 [拆头/合头实战教程](PRACTICE_P1_03_LAYOUT.md)；
 P1-04的具体练习见 [GQA实战教程](PRACTICE_P1_04_GQA.md) 和
 [GQA Notebook](../learning/practice04_gqa.ipynb)。
@@ -28,7 +28,7 @@ python -m learning.local_practice --task attention --device cuda --candidate lea
 P1-01/P1-02按任务检查各自接口，共用 `my_ops.py`，未完成的新任务不阻塞已有任务。
 P1-04已用 Day 11 Notebook 和标签张量观察，并通过 `--task gqa` 验收同一 candidate 文件。
 P1-05已通过 `--task cache` 的个人candidate验收。
-P1-06使用 [Block/SwiGLU实战教程](PRACTICE_P1_06_BLOCK.md) 和
+P1-06已通过 [Block/SwiGLU实战教程](PRACTICE_P1_06_BLOCK.md) 和
 `--task block` 验收入口。
 
 ## 1. 先做一个最小闭环
@@ -184,5 +184,5 @@ P1-01不要急着测ns级小算子的“加速比”；先交出CPU与CUDA正确
 
 本次实战开始和待填记录见 [实战日志](LOCAL_PRACTICE_LOG.md)。
 示例报告只是环境/参考/候选实现证据，不自动更新个人掌握程度。
-下一步最具体的动作：**打开 [Day 13教程](DAY13_BLOCK_BACKWARD.md)，
-先验证两次 residual 的输入分别是 `x` 和 `x1`，再检查所有参数梯度有限。**
+下一步最具体的动作：**打开 [Day 14教程](DAY14_MODEL_BASELINE.md)，
+先用同一随机权重比较 full forward 与逐 token cached logits。**

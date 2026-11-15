@@ -659,3 +659,23 @@ batch拒绝及因果前缀。CUDA报告保留GB10 capability `12.1`与兼容性w
 LM logits shape、全参数 cross-entropy backward 和 `eval()` 不关闭 autograd。
 CUDA报告保留GB10 capability `12.1`与兼容性warning；这是参考基线，
 不是个人实现或训练收敛验收。
+
+## P1-06用户Block/SwiGLU验收
+
+2026-11-16（Asia/Seoul），个人 `learning/my_block.py` 以candidate方式验收。
+该文件复用参考 Attention，独立实现FFN/SwiGLU和Block residual路径。
+
+- source_sha256：`8dca8d24e7ec473273adacaa32789084a69ac2aa46f57144779c91c26438ae6d`
+- CPU：**6 passed / 0 failed**
+- CUDA：**6 passed / 0 failed**
+
+报告路径：
+
+```text
+/workspace/logs/practice/p1-06-candidate-cpu-20261116-v2.json
+/workspace/logs/practice/p1-06-candidate-cuda-20261116-v2.json
+```
+
+覆盖SwiGLU公式、两次residual、FFN/LM梯度、logits shape和
+`eval()`/autograd边界。CUDA报告保留GB10 capability `12.1`与兼容性warning。
+当前本地实战进入P1-07。

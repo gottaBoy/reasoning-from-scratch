@@ -1,13 +1,13 @@
 # 学习进度
 
 用户确认：**概念课程已全部阅读，进入本地实战**。
-当前关卡：**P1-06：Transformer Block、SwiGLU 与 LM 输出**（对应原Day 13内容）。
-更新时间：2026-11-15（Asia/Seoul）。
+当前关卡：**P1-07：模型基线与 full/cached 对齐**（对应原Day 14内容）。
+更新时间：2026-11-16（Asia/Seoul）。
 用户的my_ops.py已通过P1-01支持范围的CPU/CUDA验收；概念阅读、代码验收与性能仍分别记录。
 
 | 维度 | 状态 |
 | --- | --- |
-| 学习位置 | 本地实战P1-06，学习中 |
+| 学习位置 | 本地实战P1-07，学习中 |
 | 概念阅读 | 用户确认全部看完，不自动等于全部模块可独立实现 |
 | Day 1–4 | 已讲解并准备/验证实验，个人自测结果仍由学习者填写 |
 | Day 5 | 已完成本轮讲解，用户决定进入下一天；个人独立自测结果尚未登记 |
@@ -18,7 +18,8 @@
 | Day 10布局 | P1-03用户my_ops.py已通过CPU/CUDA各10项 |
 | Day 11 GQA | P1-04用户my_ops.py已通过CPU/CUDA各10项 |
 | Day 12请求Cache | P1-05用户candidate已通过CPU/CUDA各7项 |
-| Day 13 Block/SwiGLU | 当前P1-06，尚未实现/验收 |
+| Day 13 Block/SwiGLU | P1-06用户candidate已通过CPU/CUDA各6项 |
+| Day 14模型基线 | 当前P1-07，尚未实现/验收 |
 | Day 9–30实现内容 | 概念已读，参考材料已备齐；按实战关卡独立实现，Day 22真实服务仍未配置 |
 | 掌握程度 | 不因助手写完参考答案或测试通过而自动提升 |
 
@@ -46,10 +47,9 @@
 
 ## 当前：P1-05请求级KV Cache
 
-P1-02、P1-03、P1-04、P1-05已完成定义范围内的CPU/CUDA验收。下一练习打开
-[Day 13教程](DAY13_BLOCK_BACKWARD.md)，检查
-`x + Attention(norm1(x))`、`x1 + FFN(norm2(x1))`、SwiGLU门控、
-LM head 输出和有限梯度；对应的参考入口是 `--task block`。
+P1-02、P1-03、P1-04、P1-05、P1-06已完成定义范围内的CPU/CUDA验收。下一练习打开
+[Day 14教程](DAY14_MODEL_BASELINE.md)，固定同一权重和工作量，对比
+full forward、cached forward、预热、同步计时和完整 logits 误差。
 先做 `3+2+3` 的单请求分块，对齐 full forward 与 cached logits；再做两个独立请求，
 验证历史不会串线，最后验证越界拒绝不污染旧Cache。
 各关模板集中放在 `my_ops_template.py`，保持未完成；你只在 `my_ops.py` 中实现，
