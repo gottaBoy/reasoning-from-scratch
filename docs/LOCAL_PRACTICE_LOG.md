@@ -2,7 +2,7 @@
 
 开始日期：2026-11-08（America/New_York）。
 用户确认：概念课程全部阅读，转入本地实战。
-当前关卡：**P1-05，请求级 KV Cache**。
+当前关卡：**P1-06，Transformer Block、SwiGLU 与 LM 输出**。
 教程：[本地反复练习路线](LOCAL_PRACTICE.md)。
 
 ## 当前状态
@@ -17,7 +17,8 @@
 | P1-02用户candidate | `/workspace/learning/my_ops.py`，CPU/CUDA各14/14通过 |
 | P1-03用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
 | P1-04用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
-| P1-05用户candidate | 尚未实现；参考入口CPU/CUDA各7/7通过 |
+| P1-05用户candidate | 同一 `/workspace/learning/my_cache.py`，CPU/CUDA各7/7通过 |
+| P1-06用户candidate | 尚未实现；先验证Block/SwiGLU和梯度契约 |
 | 后续模型/算子/引擎/服务 | 按关卡推进，未自动通过；真实vLLM仍未配置 |
 
 ## 已执行的参考证据
@@ -383,3 +384,26 @@ Cache，模型权重可以共享。超长输入必须在修改旧Cache之前拒�
 上下文拒绝前不修改Cache、batch不一致拒绝和因果前缀稳定性。
 CPU最大绝对误差为 `1.19e-7`，CUDA最大绝对误差为 `2.38e-7`；
 CUDA保留NVIDIA GB10 capability `12.1`提示。
+
+## P1-05用户文件验收：2026-11-15（Asia/Seoul）
+
+个人候选文件为 `learning/my_cache.py`，只实现请求级 `Cache`；
+`Config` 和 `Model` 复用小模型参考定义，以把练习范围限制在状态生命周期。
+
+- source_sha256：
+  `5aca066947620c8b2e1ec5d34d9d6fcc94fd75a150f6b3ff075ba87627afeeb8`
+- CPU：**7 passed / 0 failed**
+- CUDA：**7 passed / 0 failed**
+
+报告：
+
+```text
+/workspace/logs/practice/p1-05-candidate-cpu-20261115-v5.json
+/workspace/logs/practice/p1-05-candidate-cuda-20261115-v5.json
+```
+
+第一次验收发现两个接口问题：`Model.forward` 的 `cache` 不应是必填参数，
+以及 Cache 需要暴露与参考一致的 `entries`。修正后重新验收通过。
+覆盖多步 full/cached 对齐、请求隔离、逐层长度、上下文拒绝不污染、
+batch边界和因果前缀稳定性。CUDA保留GB10 capability `12.1`提示。
+P1-05完成后进入P1-06：Transformer Block、SwiGLU、LM输出与梯度。

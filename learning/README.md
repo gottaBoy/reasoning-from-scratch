@@ -2,7 +2,7 @@
 
 这里保存 30 天学习过程中的可复现实验和小型实现。
 
-**当前阶段：P1-04用户代码已通过，进入本地实战P1-05 请求级 KV Cache。**
+**当前阶段：P1-05用户代码已通过，进入本地实战P1-06 Block/SwiGLU。**
 查看 [统一注释模板](my_ops_template.py)，只在 `learning/my_ops.py` 中实现：
 保留RMSNorm/RoPE，新增causal_attention；模板本身保持未完成，便于复习。
 需要更直观的说明时，打开 [中文图解模板](my_ops_template_zh.py)：

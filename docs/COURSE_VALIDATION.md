@@ -616,3 +616,25 @@ CUDA报告保留NVIDIA GB10 capability `12.1`与PyTorch兼容性warning。
 覆盖 `3+2+3` 与 `5+1+1+1` 多步增长、逐层长度、请求隔离、
 上下文拒绝不污染、batch边界和因果前缀。CUDA报告保留GB10 capability
 `12.1`与PyTorch兼容性warning。这是参考基线，不是个人Cache模块通过。
+
+## P1-05用户Cache验收
+
+2026-11-15（Asia/Seoul），个人 `learning/my_cache.py` 在现有Spark容器中
+以candidate方式验收。该文件只实现请求级 `Cache`，复用小模型的
+`Config`/`Model` 数学定义。
+
+- source_sha256：`5aca066947620c8b2e1ec5d34d9d6fcc94fd75a150f6b3ff075ba87627afeeb8`
+- CPU：**7 passed / 0 failed**
+- CUDA：**7 passed / 0 failed**
+
+报告路径：
+
+```text
+/workspace/logs/practice/p1-05-candidate-cpu-20261115-v5.json
+/workspace/logs/practice/p1-05-candidate-cuda-20261115-v5.json
+```
+
+第一次运行暴露 `Model.forward(cache=None)` 默认接口和公开 `entries` 状态契约问题，
+修正后全部通过。结果覆盖 `3+2+3`、`5+1+1+1`、请求隔离、上下文拒绝前不修改、
+batch拒绝及因果前缀。CUDA报告保留GB10 capability `12.1`与兼容性warning。
+当前本地实战进入P1-06。
