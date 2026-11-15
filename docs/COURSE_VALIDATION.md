@@ -679,3 +679,26 @@ CUDA报告保留GB10 capability `12.1`与兼容性warning；这是参考基线�
 覆盖SwiGLU公式、两次residual、FFN/LM梯度、logits shape和
 `eval()`/autograd边界。CUDA报告保留GB10 capability `12.1`与兼容性warning。
 当前本地实战进入P1-07。
+
+## P1-07模型基线参考验收
+
+2026-11-15（Asia/Singapore），在现有Spark容器的临时源码目录中验证
+`--task baseline`，未覆盖Jupyter卷中的个人文件。
+
+- 参考CPU：**4 passed / 0 failed**，最大绝对误差 `0`。
+- 参考CUDA：**4 passed / 0 failed**，最大绝对误差 `2.38e-7`。
+- 相关回归：**53 passed**，包括candidate加载、未完成拒绝、错误logits shape拒绝、
+  CUDA不可用时不回退CPU。
+- Ruff、语法检查和Git空白检查通过。
+- 个人 `my_model.py` 初始CPU：**0/4**，M1–M3未填写；不计为个人验收通过。
+
+```text
+/workspace/logs/practice/p1-07-reference-cpu-20261115-v2.json
+/workspace/logs/practice/p1-07-reference-cuda-20261115-v2.json
+/workspace/logs/practice/p1-07-candidate-initial-20261115-v1.json
+```
+
+覆盖完整logits、因果前缀、逐层紧凑KV和warmup/同步计时口径。
+报告保留输入、seed、配置、dtype及CUDA的GB10 capability `12.1`提示。
+full和cached路径调用次数不同，本轮不据其延迟比宣称生成加速；
+3次采样仅作计时链路冒烟，不是稳定性能基准或生产服务结果。

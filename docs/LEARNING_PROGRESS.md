@@ -19,7 +19,7 @@
 | Day 11 GQA | P1-04用户my_ops.py已通过CPU/CUDA各10项 |
 | Day 12请求Cache | P1-05用户candidate已通过CPU/CUDA各7项 |
 | Day 13 Block/SwiGLU | P1-06用户candidate已通过CPU/CUDA各6项 |
-| Day 14模型基线 | 当前P1-07，尚未实现/验收 |
+| Day 14模型基线 | 当前P1-07；参考入口已验证，my_model.py的M1–M3待实现 |
 | Day 9–30实现内容 | 概念已读，参考材料已备齐；按实战关卡独立实现，Day 22真实服务仍未配置 |
 | 掌握程度 | 不因助手写完参考答案或测试通过而自动提升 |
 
@@ -45,16 +45,15 @@
   GB10提示保留，测试与执行记录详见 [验证报告](COURSE_VALIDATION.md)。
 - 上述历史补记未重复执行全部实验，当时保留Day 8位置；现在按用户新决定转入本地实战。
 
-## 当前：P1-05请求级KV Cache
+## 当前：P1-07模型基线
 
-P1-02、P1-03、P1-04、P1-05、P1-06已完成定义范围内的CPU/CUDA验收。下一练习打开
-[Day 14教程](DAY14_MODEL_BASELINE.md)，固定同一权重和工作量，对比
-full forward、cached forward、预热、同步计时和完整 logits 误差。
-先做 `3+2+3` 的单请求分块，对齐 full forward 与 cached logits；再做两个独立请求，
-验证历史不会串线，最后验证越界拒绝不污染旧Cache。
-各关模板集中放在 `my_ops_template.py`，保持未完成；你只在 `my_ops.py` 中实现，
-无需单独的Attention模板/实现文件。P1-04的报告与hash见实战日志。
-P1-05当前使用小模型和独立Cache实验，尚未接入新的candidate验收命令。
+P1-02、P1-03、P1-04、P1-05、P1-06已完成定义范围内的CPU/CUDA验收。打开
+[P1-07实战教程](PRACTICE_P1_07_BASELINE.md)和[Day 14教程](DAY14_MODEL_BASELINE.md)，
+固定同一权重、输入、dtype/设备，对齐完整logits，再记录预热、同步和重复采样的口径。
+本关个人文件为 `learning/my_model.py`，复用已完成的Block、Cache和RMSNorm，
+只填写M1–M3模型前向组装；不覆盖此前个人模块。
+使用 `--task baseline --candidate learning/my_model.py` 验收，
+参考基线通过不等于个人文件已通过，也不自动进入P2。
 未传candidate时只验证参考实现；传文件也不自动证明独立创作或精通。
 本阶段不需要重建镜像、下载模型或升级现有依赖，也不加入分页Cache或服务调度。
 

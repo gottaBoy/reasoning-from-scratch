@@ -30,6 +30,9 @@ P1-04已用 Day 11 Notebook 和标签张量观察，并通过 `--task gqa` 验�
 P1-05已通过 `--task cache` 的个人candidate验收。
 P1-06已通过 [Block/SwiGLU实战教程](PRACTICE_P1_06_BLOCK.md) 和
 `--task block` 验收入口。
+P1-07使用 [模型基线实战教程](PRACTICE_P1_07_BASELINE.md) 和
+`--task baseline`，个人文件是 `learning/my_model.py`。
+先固定相同权重和输入位置比较 full/cached；不同调用路径的延迟不直接作为Cache加速比。
 
 ## 1. 先做一个最小闭环
 
@@ -146,7 +149,7 @@ RoPE：
 | P1-04 | MQA/GQA参数化 | Hkv=1/2/4映射；紧凑KV不误扩展为Cache | [实战](PRACTICE_P1_04_GQA.md)、[Day 11](DAY11_GQA_MQA.md) |
 | P1-05 | 请求级KV Cache | 3+2+3、多步增长、上下文拒绝不污染 | [实战](PRACTICE_P1_05_CACHE.md)、[Day 12](DAY12_REQUEST_CACHE.md) |
 | P1-06 | Block/SwiGLU/LM输出 | 两次残差、loss/backward、全部梯度有限 | [实战](PRACTICE_P1_06_BLOCK.md)、[Day 13](DAY13_BLOCK_BACKWARD.md) |
-| P1-07 | 模型基线 | 相同工作量、预热/同步、完整logits误差 | [Day 14](DAY14_MODEL_BASELINE.md) |
+| P1-07 | 模型基线 | 相同工作量、预热/同步、完整logits误差 | [实战](PRACTICE_P1_07_BASELINE.md)、[Day 14](DAY14_MODEL_BASELINE.md) |
 | P2-01 | CUDA Vector Add | N=255/256/257；尾部越界检查 | [Day 15](DAY15_CUDA_INDEXING.md) |
 | P2-02 | Shared Reduction | 无效线程仍同步；partial独立参考 | [Day 16](DAY16_SHARED_REDUCTION.md) |
 | P2-03 | Triton Add/RMSNorm | 1003尾部、非全1gamma、拒绝错误layout | [Day 17](DAY17_TRITON_ROWS.md) |
@@ -184,5 +187,5 @@ P1-01不要急着测ns级小算子的“加速比”；先交出CPU与CUDA正确
 
 本次实战开始和待填记录见 [实战日志](LOCAL_PRACTICE_LOG.md)。
 示例报告只是环境/参考/候选实现证据，不自动更新个人掌握程度。
-下一步最具体的动作：**打开 [Day 14教程](DAY14_MODEL_BASELINE.md)，
-先用同一随机权重比较 full forward 与逐 token cached logits。**
+下一步最具体的动作：**打开 [P1-07实战教程](PRACTICE_P1_07_BASELINE.md)，
+先运行 `--task baseline --device cpu`，再记录固定工作量的误差和计时口径。**

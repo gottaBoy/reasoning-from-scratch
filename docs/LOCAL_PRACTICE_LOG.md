@@ -19,7 +19,7 @@
 | P1-04用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
 | P1-05用户candidate | 同一 `/workspace/learning/my_cache.py`，CPU/CUDA各7/7通过 |
 | P1-06用户candidate | 同一 `/workspace/learning/my_block.py`，CPU/CUDA各6/6通过 |
-| P1-07用户candidate | 尚未实现；先固定权重和工作量做full/cached基线 |
+| P1-07用户candidate | `learning/my_model.py`的M1–M3待实现；初始CPU 0/4，未登记通过 |
 | 后续模型/算子/引擎/服务 | 按关卡推进，未自动通过；真实vLLM仍未配置 |
 
 ## 已执行的参考证据
@@ -451,3 +451,31 @@ FFN和全模型梯度、LM logits shape及 `eval()` 不关闭autograd。
 最初发现配置字段名与仓库 `Config` 不一致，改为 `width`/`hidden`
 并使用RMSNorm默认epsilon后通过。CUDA保留GB10 capability `12.1`提示。
 P1-06完成后进入P1-07：模型基线与full/cached对齐。
+
+## P1-07参考入口与个人组装练习
+
+2026-11-15（Asia/Singapore），新增 [P1-07实战教程](PRACTICE_P1_07_BASELINE.md)、
+`learning/practice_model.py`、`--task baseline`和个人框架 `learning/my_model.py`。
+此前P1-06候选实现已在提交 `37bc6ad` 中推送。
+
+- 参考CPU：**4 passed / 0 failed**，完整logits最大绝对误差 `0`。
+- 参考CUDA：**4 passed / 0 failed**，完整logits最大绝对误差 `2.38e-7`。
+- 相关回归：**53 passed**；Ruff、语法检查和Git空白检查通过。
+- 个人框架CPU：**0 passed / 4 failed**，均因M1–M3尚未实现，保留失败记录。
+
+报告：
+
+```text
+/workspace/logs/practice/p1-07-reference-cpu-20261115-v2.json
+/workspace/logs/practice/p1-07-reference-cuda-20261115-v2.json
+/workspace/logs/practice/p1-07-candidate-initial-20261115-v1.json
+```
+
+报告记录seed、配置、输入、FP32、`5+1+1+1`分块、容差、warmup和重复次数；
+逐层核对紧凑KV `[1,2,8,6]`，CUDA保留GB10 capability `12.1`提示。
+计时只验证同步wall-clock链路；一次full调用与多次cached调用不同，
+不据此计算生成加速比，也不将这组极短采样当作稳定性能结论。
+
+个人框架复用已完成的Block、Cache、RMSNorm，Attention仍使用课程参考。
+下一步只填写M1 embedding、M2逐层Block、M3 final norm/head；
+实现与验收完成前保留P1-07学习中，不自动进入P2。
