@@ -40,8 +40,13 @@ class Model(nn.Module):
                     raise ValueError("Inconsistent per-layer cache.")
 
         # TODO M1: embed ids, [B,T] -> [B,T,E], where E = self.cfg.width.
+        x = self.embedding(ids)
         # TODO M2: loop over enumerate(self.blocks). Pass the same position
         # and request cache to each block, but its own layer index.
+        for layer, block in enumerate(self.blocks):
+            x = block(x, position, cache, layer)
         # TODO M3: apply the final norm, then head -> [B,T,self.cfg.vocab].
         # Return logits, not softmax probabilities or argmax token IDs.
-        raise NotImplementedError("Implement M1-M3 in Model.forward.")
+        x = self.norm(x)
+        x = self.head(x)
+        return x

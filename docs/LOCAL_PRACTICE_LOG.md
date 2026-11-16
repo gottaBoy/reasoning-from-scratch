@@ -2,7 +2,7 @@
 
 开始日期：2026-11-08（America/New_York）。
 用户确认：概念课程全部阅读，转入本地实战。
-当前关卡：**P1-07，模型基线与 full/cached 对齐**。
+当前关卡：**P2-02，共享内存归约**。
 教程：[本地反复练习路线](LOCAL_PRACTICE.md)。
 
 ## 当前状态
@@ -11,15 +11,17 @@
 | --- | --- |
 | 概念阅读 | 用户自述已全部看完，不等于逐模块独立实现 |
 | 已有环境 | 复用Spark Docker/Jupyter，不重建、不升级依赖 |
-| 验收入口 | `python -m learning.local_practice --task attention`；默认任务仍为norm-rope，可传自己的candidate文件 |
-| 参考CPU/CUDA基线 | 本次均14/14通过，implementation_role为reference_baseline |
+| P2-01验收入口 | 宿主机 `python3 -m learning.practice_vector_add --arch sm_121 --sanitize`，可传个人.cu |
+| P1-01参考CPU/CUDA基线 | 历史记录各14/14通过，implementation_role为reference_baseline |
 | P1-01用户candidate | `/workspace/learning/my_ops.py`，支持范围内CPU/CUDA均14/14通过 |
 | P1-02用户candidate | `/workspace/learning/my_ops.py`，CPU/CUDA各14/14通过 |
 | P1-03用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
 | P1-04用户candidate | 同一 `/workspace/learning/my_ops.py`，CPU/CUDA各10/10通过 |
 | P1-05用户candidate | 同一 `/workspace/learning/my_cache.py`，CPU/CUDA各7/7通过 |
 | P1-06用户candidate | 同一 `/workspace/learning/my_block.py`，CPU/CUDA各6/6通过 |
-| P1-07用户candidate | `learning/my_model.py`的M1–M3待实现；初始CPU 0/4，未登记通过 |
+| P1-07用户candidate | `learning/my_model.py`已补齐；CPU/CUDA各4/4通过，个人复盘待完成 |
+| P2-01用户candidate | `learning/my_vector_add.cu`已通过6/6及memcheck；初始0/6记录保留 |
+| P2-02用户candidate | 尚未开始；先手算归约并阅读现有block_sum参考 |
 | 后续模型/算子/引擎/服务 | 按关卡推进，未自动通过；真实vLLM仍未配置 |
 
 ## 已执行的参考证据
@@ -479,3 +481,100 @@ P1-06完成后进入P1-07：模型基线与full/cached对齐。
 个人框架复用已完成的Block、Cache、RMSNorm，Attention仍使用课程参考。
 下一步只填写M1 embedding、M2逐层Block、M3 final norm/head；
 实现与验收完成前保留P1-07学习中，不自动进入P2。
+
+## P1-07候选模型组装验收：2026-11-15（Asia/Singapore）
+
+本轮按用户“继续”要求，补齐并核对 `learning/my_model.py` 的M1–M3：
+embedding → 按层Block → final RMSNorm → LM head。
+forward开始时只读取一次position，每层使用自己的Cache索引，返回未做softmax的logits。
+之前的Block、Cache、RMSNorm和参考Attention源码未改动。
+
+- source_sha256：
+  `62085bb8bdce4c428539ba73eef41d91da40257fa50fcca457182b9abbf28848`
+- candidate CPU：**4 passed / 0 failed**，full/cached最大绝对误差 `0`。
+- candidate CUDA：**4 passed / 0 failed**，full/cached最大绝对误差 `2.38e-7`。
+- 相关回归：**69 passed**；Ruff、语法和Git空白检查通过。
+
+补充验证在CPU/CUDA各覆盖18组配置：
+`Hkv=1/2/4`、`B=1/2`、`T=1/7/8`，分块分别为`1`、`2+1+4`、`3+2+3`。
+参考模型显式加载candidate的state_dict后，完整logits最大差异均为`0`；
+full/cached最大差异为CPU `2.98e-7`、CUDA `3.58e-7`。
+另外检查两种设备上所有参数梯度有限，以及上下文越界拒绝后各层K/V逐值不变。
+
+```text
+/workspace/logs/practice/p1-07-candidate-cpu-20261115-v2.json
+/workspace/logs/practice/p1-07-candidate-cuda-20261115-v2.json
+/workspace/logs/practice/p1-07-candidate-extended-20261115-v1.json
+```
+
+扩展报告记录候选模型及所依赖Block、Cache、RMSNorm、参考源码的hash。
+保留验证期间文件中的逐步norm/head/return写法，最终文件hash与各报告一致。
+验收使用容器临时源码目录，未覆盖Jupyter卷中的个人文件；
+CUDA保留GB10 capability `12.1`兼容性提示。
+这是定义范围内的候选实现证据，不证明学习者独立创作、语言质量或性能加速；
+P1-07保留个人复盘，不自动进入P2。
+
+## P2-01启动：2026-11-16（Asia/Singapore）
+
+用户在P1-07定义范围验收通过后要求继续，当前进入CUDA Vector Add实战。
+新增 [P2-01教程](PRACTICE_P2_01_VECTOR_ADD.md)、`learning/my_vector_add.cu`
+的V1/V2框架，以及独立于PyTorch的 `learning/practice_vector_add.py`。
+文本/图像/音频/视频只类比同shape特征相加，实际输入是一维FP32元素数组。
+
+宿主机实际使用CUDA Toolkit 13.0、NVIDIA GB10 capability `12.1`，
+显式编译 `sm_121`，不重建容器或升级torch。
+验收器与kernel分别编译链接；源码和harness hash、nvcc命令、进程退出码、
+各组错误计数及memcheck日志均保存。
+
+- 参考kernel：**6/6通过**，memcheck **0 errors**。
+- 个人框架：**0/6**，因V1/V2未填而未写入输出；不是个人通过。
+- 漏边界的临时kernel：**1/6**，仅整齐大小256通过，其他大小guard被写坏。
+- 只用threadIdx的临时kernel：**3/6**，所有N>256的结果遗漏被识别。
+- 独立验收器测试：**22 passed**；含P1回归与curriculum的相关测试合计 **91 passed**。
+- Ruff、语法及Git空白检查通过。本轮没有性能测量。
+
+宿主机报告（不在Jupyter卷中）：
+
+```text
+logs/practice/p2-01-reference-20261116-v3.json
+logs/practice/p2-01-candidate-initial-20261116-v2.json
+logs/practice/p2-01-no-guard-20261116-v1.json
+logs/practice/p2-01-local-index-20261116-v1.json
+```
+
+两份memcheck并行运行时，参考v2报告记录一次 `cudaMalloc: out of memory`，
+串行v3重跑通过；失败证据保留在 `p2-01-reference-20261116-v2.json`，
+未把资源失败当作通过，也未停止其他用户进程。
+memcheck无错误不能替代数值检查：空kernel和上述逻辑错误都不因memcheck为零而通过。
+
+个人文件hash：
+`200b3223188c1dab646b3de8f19bb60ea6fde60a64cc25c71d8e56647820315a`。
+下一步先手算N=257的两个block，再填写全局索引和 `i < n`，
+用 `--candidate learning/my_vector_add.cu --sanitize` 验收。
+
+## P2-01个人kernel验收：2026-11-16（Asia/Singapore）
+
+用户要求继续时，读取到V1/V2已经完成：使用全局线程索引，
+在 `i < n` 时写 `out[i] = a[i] + b[i]`。
+未改算法，仅移除“未完成kernel应失败”的过期注释，再验证最终文件。
+
+- source_sha256：
+  `602dfc13f867d707e2e1d58c5d6a5e67110cd3b1cecb6c1e34f8678269109155`
+- 实际candidate：**6 passed / 0 failed**。
+- 六组N的数值、输入不变、输出guard检查全部通过。
+- Compute Sanitizer memcheck：**0 errors**，退出码0。
+- 本轮验收器保护测试：**22 passed**；Git空白检查通过。
+
+宿主机报告：
+
+```text
+logs/practice/p2-01-20261115T164753001600Z.json
+```
+
+报告文件名使用UTC，执行日期按Asia/Singapore记为2026-11-16。
+本轮串行执行memcheck，原先0/6、故障注入及资源错误报告均保留。
+本轮不重复声称前次91项回归已重新执行，也不把正确性证据作为性能结论。
+
+继续P2-02时先沿用 [Day 16教程](DAY16_SHARED_REDUCTION.md)：
+8项折半相加、尾部填0、block内同步和partial写回。
+此处仅进入下一练习的阅读/手算，未创建或验收个人归约kernel。

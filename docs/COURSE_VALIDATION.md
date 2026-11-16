@@ -702,3 +702,83 @@ CUDA报告保留GB10 capability `12.1`与兼容性warning；这是参考基线�
 报告保留输入、seed、配置、dtype及CUDA的GB10 capability `12.1`提示。
 full和cached路径调用次数不同，本轮不据其延迟比宣称生成加速；
 3次采样仅作计时链路冒烟，不是稳定性能基准或生产服务结果。
+
+## P1-07候选模型组装验收
+
+2026-11-15（Asia/Singapore），按用户要求补齐并核对 `learning/my_model.py`
+的embedding、按层Block及final norm/LM head，用容器临时源码目录执行candidate验收。
+
+- source_sha256：`62085bb8bdce4c428539ba73eef41d91da40257fa50fcca457182b9abbf28848`
+- CPU：**4 passed / 0 failed**，full/cached最大绝对误差 `0`。
+- CUDA：**4 passed / 0 failed**，full/cached最大绝对误差 `2.38e-7`。
+- 相关回归（实战入口、Day 10、模板及curriculum）：**69 passed**。
+- Ruff、语法及Git空白检查通过。
+
+另在每种设备验证18组配置（`Hkv=1/2/4`、`B=1/2`、`T=1/7/8`）：
+参考模型加载同一state_dict后完整logits最大差异为`0`；
+full/cached最大差异为CPU `2.98e-7`、CUDA `3.58e-7`。
+两种设备上全参数梯度均存在且有限，越界拒绝后各层K/V逐值不变。
+
+```text
+/workspace/logs/practice/p1-07-candidate-cpu-20261115-v2.json
+/workspace/logs/practice/p1-07-candidate-cuda-20261115-v2.json
+/workspace/logs/practice/p1-07-candidate-extended-20261115-v1.json
+```
+
+扩展报告保留所有复用源码hash；未覆盖Jupyter个人文件。
+CUDA保留GB10 capability `12.1`兼容性warning，不推断生产kernel兼容性。
+本次不作加速、预训练语言能力或学习者独立实现的结论，不自动推进到P2。
+
+## P2-01 CUDA Vector Add实战入口
+
+2026-11-16（Asia/Singapore），按用户继续要求进入P2-01。
+新入口在已有nvcc的宿主机运行，不依赖PyTorch或容器CUDA编译器；
+原 `vector_reduce.cu` 合并参考程序不修改。
+
+- GB10 capability `12.1`，CUDA Toolkit 13.0，显式目标 `sm_121`。
+- 参考kernel：**6 passed / 0 failed**，Compute Sanitizer memcheck **0 errors**。
+- 未填个人kernel：**0 passed / 6 failed**，所有输出保持预填NaN，明确数值失败。
+- 漏尾部判断的临时kernel：**1 passed / 5 failed**，非整齐大小全部被guard检查拒绝。
+- 仅用threadIdx的临时kernel：**3 passed / 3 failed**，N>256全部失败。
+- host独立协议/环境测试：**22 passed**；容器中相关回归合计 **91 passed**。
+- Ruff、语法和Git空白检查通过。
+
+参考和候选均覆盖N=1/255/256/257/1003/65537，对照CPU FP64结果并检查有限性、
+输入不变和输出guard。不以仅数值正确或仅memcheck为零作为完整验收。
+nvcc缺失、明确要求的memcheck缺失/无清洁报告或CUDA运行错误都不会回退CPU冒充通过。
+
+```text
+# 宿主机仓库中的原始报告，不在Jupyter卷中
+logs/practice/p2-01-reference-20261116-v3.json
+logs/practice/p2-01-candidate-initial-20261116-v2.json
+logs/practice/p2-01-no-guard-20261116-v1.json
+logs/practice/p2-01-local-index-20261116-v1.json
+```
+
+并行运行memcheck时，参考v2曾报告cudaMalloc内存不足，
+保留 `logs/practice/p2-01-reference-20261116-v2.json`；
+未关闭其他用户进程，串行v3重跑通过。
+本入口只证明上述大小的功能/边界检查，不证明任意并发错误、带宽或性能加速；
+个人V1/V2仍待实现，不登记个人P2-01通过。
+
+## P2-01个人Vector Add验收
+
+2026-11-16（Asia/Singapore），读取到个人 `learning/my_vector_add.cu`
+已经完成全局索引和 `i < n` 边界保护。只移除过期的未完成注释，
+未修改kernel算法，按最终文件运行candidate验收。
+
+- source_sha256：`602dfc13f867d707e2e1d58c5d6a5e67110cd3b1cecb6c1e34f8678269109155`
+- **6 passed / 0 failed**，N=1/255/256/257/1003/65537。
+- 各组数值、输入不变及前后/逻辑尾部guard检查均通过。
+- Compute Sanitizer memcheck：**0 errors**，退出码0。
+- 本轮独立验收器测试：**22 passed**；Git空白检查通过。
+
+```text
+# 宿主机报告；文件名使用UTC时间
+logs/practice/p2-01-20261115T164753001600Z.json
+```
+
+本轮串行执行memcheck，保留先前资源不足和错误kernel证据；
+不将前次91项回归计作本轮新执行，不宣称带宽或加速。
+下一练习为P2-02共享内存归约，当前只使用现有Day 16教程和参考程序，
+尚无个人归约实现通过的结论。

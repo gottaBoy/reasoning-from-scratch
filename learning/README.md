@@ -2,7 +2,16 @@
 
 这里保存 30 天学习过程中的可复现实验和小型实现。
 
-**当前阶段：P1-06用户代码已通过，进入本地实战P1-07 模型基线。**
+**当前阶段：P2-01个人kernel已通过，进入P2-02共享内存归约。**
+先阅读 [Day 16教程](../docs/DAY16_SHARED_REDUCTION.md) 并手算8项折半相加；
+当前使用 `kernels/vector_reduce.cu` 的 `block_sum` 作为参考，
+P2-02个人candidate尚未接入验收。
+P2-01个人文件 `learning/my_vector_add.cu` 已通过6/6及memcheck，
+[线程索引教程](../docs/PRACTICE_P2_01_VECTOR_ADD.md)与
+`python3 -m learning.practice_vector_add` 保留作复查；
+`my_ops.py`、`my_cache.py`、`my_block.py`、`my_model.py` 保留，不覆盖。
+
+以下P1统一模板与命令保留作复习：
 查看 [统一注释模板](my_ops_template.py)，只在 `learning/my_ops.py` 中实现：
 保留RMSNorm/RoPE，新增causal_attention；模板本身保持未完成，便于复习。
 需要更直观的说明时，打开 [中文图解模板](my_ops_template_zh.py)：
@@ -32,6 +41,8 @@ Day 9–30的详细教程、实验入口和个人记录模板见
 | 本地实战P1-05 | `PRACTICE_P1_05_CACHE.md`、自己的Cache模块、`practice_cache.py`、`--task cache` |
 | 本地实战P1-06 | `PRACTICE_P1_06_BLOCK.md`、自己的Block模块、`practice_block.py`、`--task block` |
 | 本地实战P1-07 | `PRACTICE_P1_07_BASELINE.md`、自己的`my_model.py`、`practice_model.py`、`--task baseline` |
+| 本地实战P2-01 | `PRACTICE_P2_01_VECTOR_ADD.md`、自己的`my_vector_add.cu`、`practice_vector_add.py` |
+| 本地实战P2-02 | `DAY16_SHARED_REDUCTION.md`、`kernels/vector_reduce.cu`；个人candidate待接入 |
 | Day 3 | `day03_debug.ipynb`、`day03_shapes.py` |
 | Day 3 RoPE/SwiGLU | `day03_rope_swiglu.ipynb` |
 | Day 4 | `day04_kv_cache.ipynb`、`day04_cache.py` |

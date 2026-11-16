@@ -1,5 +1,12 @@
 # CUDA / Triton 学习算子
 
+P2-01个人练习见 [Vector Add实战](../../docs/PRACTICE_P2_01_VECTOR_ADD.md)：
+`vector_add.cu` 为参考kernel，`vector_add_check.cu` 为独立host验收程序，
+`../my_vector_add.cu` 只填写kernel。宿主机运行
+`python3 -m learning.practice_vector_add --arch sm_121 --sanitize`，
+验收个人文件时另加 `--candidate learning/my_vector_add.cu`。
+此入口不依赖PyTorch，不修改下方Day 15–16合并程序。
+
 `triton_ops.py` 包含 Add、RMSNorm、Softmax、非 affine LayerNorm、
 SiLU×up、tiled MatMul、online causal Attention。全部为教学 forward-only；
 wrapper 显式拒绝 CPU、非连续 tensor、不匹配 dtype/device 和 requires_grad 输入。

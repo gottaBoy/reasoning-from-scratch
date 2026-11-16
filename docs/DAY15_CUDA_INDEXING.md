@@ -2,6 +2,10 @@
 
 前置：[Day 14基线](DAY14_MODEL_BASELINE.md)。从CPU数学进入GPU执行，不从优化参数开始。
 
+本地个人练习入口：[P2-01线程索引与Vector Add](PRACTICE_P2_01_VECTOR_ADD.md)。
+该入口只练向量加法，提供独立的个人kernel文件与宿主机验收器；
+下文 `vector_reduce.cu` 仍作为Day 15–16合并参考程序保留。
+
 ## 1. 图解与数字例子
 
 把grid看成整张工单，block是小组，thread是组内工人：

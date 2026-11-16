@@ -1,13 +1,13 @@
 # 学习进度
 
 用户确认：**概念课程已全部阅读，进入本地实战**。
-当前关卡：**P1-07：模型基线与 full/cached 对齐**（对应原Day 14内容）。
-更新时间：2026-11-16（Asia/Seoul）。
+当前关卡：**P2-02：共享内存归约**（对应原Day 16内容）。
+更新时间：2026-11-16（Asia/Singapore）。
 用户的my_ops.py已通过P1-01支持范围的CPU/CUDA验收；概念阅读、代码验收与性能仍分别记录。
 
 | 维度 | 状态 |
 | --- | --- |
-| 学习位置 | 本地实战P1-07，学习中 |
+| 学习位置 | 本地实战P2-02，先手算block内归约与同步 |
 | 概念阅读 | 用户确认全部看完，不自动等于全部模块可独立实现 |
 | Day 1–4 | 已讲解并准备/验证实验，个人自测结果仍由学习者填写 |
 | Day 5 | 已完成本轮讲解，用户决定进入下一天；个人独立自测结果尚未登记 |
@@ -19,7 +19,9 @@
 | Day 11 GQA | P1-04用户my_ops.py已通过CPU/CUDA各10项 |
 | Day 12请求Cache | P1-05用户candidate已通过CPU/CUDA各7项 |
 | Day 13 Block/SwiGLU | P1-06用户candidate已通过CPU/CUDA各6项 |
-| Day 14模型基线 | 当前P1-07；参考入口已验证，my_model.py的M1–M3待实现 |
+| Day 14模型基线 | my_model.py的M1–M3已补齐；candidate CPU/CUDA各4/4通过 |
+| Day 15 CUDA索引 | P2-01个人kernel已通过6/6，memcheck零错误 |
+| Day 16共享归约 | 当前P2-02，个人实现尚未开始 |
 | Day 9–30实现内容 | 概念已读，参考材料已备齐；按实战关卡独立实现，Day 22真实服务仍未配置 |
 | 掌握程度 | 不因助手写完参考答案或测试通过而自动提升 |
 
@@ -45,17 +47,25 @@
   GB10提示保留，测试与执行记录详见 [验证报告](COURSE_VALIDATION.md)。
 - 上述历史补记未重复执行全部实验，当时保留Day 8位置；现在按用户新决定转入本地实战。
 
-## 当前：P1-07模型基线
+## 当前：P2-02共享内存归约
 
-P1-02、P1-03、P1-04、P1-05、P1-06已完成定义范围内的CPU/CUDA验收。打开
-[P1-07实战教程](PRACTICE_P1_07_BASELINE.md)和[Day 14教程](DAY14_MODEL_BASELINE.md)，
-固定同一权重、输入、dtype/设备，对齐完整logits，再记录预热、同步和重复采样的口径。
-本关个人文件为 `learning/my_model.py`，复用已完成的Block、Cache和RMSNorm，
-只填写M1–M3模型前向组装；不覆盖此前个人模块。
-使用 `--task baseline --candidate learning/my_model.py` 验收，
-参考基线通过不等于个人文件已通过，也不自动进入P2。
-未传candidate时只验证参考实现；传文件也不自动证明独立创作或精通。
-本阶段不需要重建镜像、下载模型或升级现有依赖，也不加入分页Cache或服务调度。
+2026-11-16用户要求继续，读取到个人 `learning/my_vector_add.cu`
+已完成V1/V2，实际candidate验收6/6通过，memcheck零错误。
+P2-01复查命令保留：
+
+```bash
+python3 -m learning.practice_vector_add --arch sm_121 \
+  --candidate learning/my_vector_add.cu --sanitize
+```
+
+下一练习打开 [Day 16教程](DAY16_SHARED_REDUCTION.md)，先手算8项折半相加，
+再阅读 `learning/kernels/vector_reduce.cu` 中的 `block_sum`。
+固定每block 256线程，有效线程加载数值，尾部线程填0；
+每个block输出一个partial，当前课程参考的最终合并在CPU。
+P2-02暂使用现有教程/参考程序，尚无新的个人candidate验收入口，
+不把Vector Add通过等同于归约实现通过。
+本机GB10使用sm_121，其他设备先核对实际架构。
+个人复盘和性能限制仍保留，不因推进关卡自动证明独立创作或精通。
 
 ## Day 8 参考入口
 

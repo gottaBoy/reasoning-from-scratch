@@ -2,12 +2,16 @@
 
 用户已确认概念课程全部阅读，现进入本地实战。
 “已读完”是用户学习记录，不自动等于所有模块已独立实现或性能验收。
-当前关卡为 **P1-07：模型基线与 full/cached 对齐**。
+当前关卡为 **P2-02：共享内存归约**。
+P2-01个人 `learning/my_vector_add.cu` 已完成V1/V2，6/6及memcheck通过；
+[Vector Add教程](PRACTICE_P2_01_VECTOR_ADD.md)与宿主机验收命令保留作复习。
+现在打开 [Day 16教程](DAY16_SHARED_REDUCTION.md)，先手算block内折半相加，
+暂沿用现有参考程序；P2-02尚未接入个人candidate验收。
 P1-01的用户 `my_ops.py` 已通过本关支持范围的CPU/CUDA各14项检查，记录见
 [实战日志](LOCAL_PRACTICE_LOG.md)，不把该结果推广为所有输入或性能已验收。
 P1-02的 `causal_attention`、P1-03的拆头/合头、P1-04的KV head映射、
 P1-05的请求级Cache和P1-06的Block/SwiGLU已完成支持范围内验收。
-现在查看 [Day 14教程](DAY14_MODEL_BASELINE.md)，固定工作量比较模型基线。
+P1-07的模型基线也已完成定义范围内验收；下面保留此前入口作复查。
 P1-03的练习见 [拆头/合头实战教程](PRACTICE_P1_03_LAYOUT.md)；
 P1-04的具体练习见 [GQA实战教程](PRACTICE_P1_04_GQA.md) 和
 [GQA Notebook](../learning/practice04_gqa.ipynb)。
@@ -32,6 +36,7 @@ P1-06已通过 [Block/SwiGLU实战教程](PRACTICE_P1_06_BLOCK.md) 和
 `--task block` 验收入口。
 P1-07使用 [模型基线实战教程](PRACTICE_P1_07_BASELINE.md) 和
 `--task baseline`，个人文件是 `learning/my_model.py`。
+模型组装已补齐，该candidate已通过CPU/CUDA各4项，个人复盘仍保留。
 先固定相同权重和输入位置比较 full/cached；不同调用路径的延迟不直接作为Cache加速比。
 
 ## 1. 先做一个最小闭环
@@ -150,7 +155,7 @@ RoPE：
 | P1-05 | 请求级KV Cache | 3+2+3、多步增长、上下文拒绝不污染 | [实战](PRACTICE_P1_05_CACHE.md)、[Day 12](DAY12_REQUEST_CACHE.md) |
 | P1-06 | Block/SwiGLU/LM输出 | 两次残差、loss/backward、全部梯度有限 | [实战](PRACTICE_P1_06_BLOCK.md)、[Day 13](DAY13_BLOCK_BACKWARD.md) |
 | P1-07 | 模型基线 | 相同工作量、预热/同步、完整logits误差 | [实战](PRACTICE_P1_07_BASELINE.md)、[Day 14](DAY14_MODEL_BASELINE.md) |
-| P2-01 | CUDA Vector Add | N=255/256/257；尾部越界检查 | [Day 15](DAY15_CUDA_INDEXING.md) |
+| P2-01 | CUDA Vector Add | N=255/256/257；尾部guard与memcheck | [实战](PRACTICE_P2_01_VECTOR_ADD.md)、[Day 15](DAY15_CUDA_INDEXING.md) |
 | P2-02 | Shared Reduction | 无效线程仍同步；partial独立参考 | [Day 16](DAY16_SHARED_REDUCTION.md) |
 | P2-03 | Triton Add/RMSNorm | 1003尾部、非全1gamma、拒绝错误layout | [Day 17](DAY17_TRITON_ROWS.md) |
 | P2-04 | Softmax/LayerNorm | 大分数、常数行、错误padding负例 | [Day 18](DAY18_STABLE_ROW_OPS.md) |
@@ -187,5 +192,5 @@ P1-01不要急着测ns级小算子的“加速比”；先交出CPU与CUDA正确
 
 本次实战开始和待填记录见 [实战日志](LOCAL_PRACTICE_LOG.md)。
 示例报告只是环境/参考/候选实现证据，不自动更新个人掌握程度。
-下一步最具体的动作：**打开 [P1-07实战教程](PRACTICE_P1_07_BASELINE.md)，
-先运行 `--task baseline --device cpu`，再记录固定工作量的误差和计时口径。**
+下一步最具体的动作：**打开 [Day 16教程](DAY16_SHARED_REDUCTION.md)，
+手算 `[1,2,3,4,5,6,7,8]` 的三轮归约，再定位 `block_sum` 的共享数组与同步点。**
