@@ -578,3 +578,38 @@ logs/practice/p2-01-20261115T164753001600Z.json
 继续P2-02时先沿用 [Day 16教程](DAY16_SHARED_REDUCTION.md)：
 8项折半相加、尾部填0、block内同步和partial写回。
 此处仅进入下一练习的阅读/手算，未创建或验收个人归约kernel。
+
+## P2-02启动：2026-11-17（Asia/Seoul）
+
+用户要求记录CUDA kernel语法并继续。新增
+[P2-02逐线程归约教程](PRACTICE_P2_02_REDUCTION.md)、
+`learning/practice_reduction.py`、独立host harness、
+参考 `learning/kernels/block_sum.cu` 和个人
+`learning/my_block_sum.cu`。
+
+教程补充了 `__global__`、指针、`threadIdx/blockIdx/blockDim`、
+`__shared__`、`__syncthreads`、条件语句、for循环和kernel launch的最小语法；
+个人文件只填写R1–R5，不需要main或CUDA内存分配。
+
+- 参考归约：6/6，三种输入pattern，partial和CPU最终和均通过。
+- 参考 memcheck/racecheck/synccheck：均为零错误。
+- 验收协议/环境测试：**39 passed**。
+- 个人框架初始：0/6，保留失败报告。
+- 主模型补齐个人R1–R5后，源码逻辑与参考kernel一致；
+  候选重跑遇到 `cudaMalloc` out-of-memory，尚未登记个人sanitizer通过。
+
+报告：
+
+```text
+logs/practice/p2-02-20261116T160234029190Z.json
+logs/practice/p2-02-20261116T160338962159Z.json
+logs/practice/p2-02-20261116T160004537119Z.json
+logs/practice/p2-02-20261116T163312652518Z.json
+logs/practice/p2-02-20261116T163332098240Z.json
+```
+
+其中参考串行重试报告通过；个人候选报告记录资源失败，没有将其改写为数值失败或通过。
+此前尝试的DeepSeek子任务由delegation backend返回HTTP 404（模型未被配置账号支持），
+因此没有把“DeepSeek执行”写成事实；当前修改由主模型完成。
+下一步是在GPU资源可用时串行重跑个人 candidate，再做故障注入：
+尾部不填0、同步放错位置、或让部分线程跳过barrier。

@@ -782,3 +782,20 @@ logs/practice/p2-01-20261115T164753001600Z.json
 不将前次91项回归计作本轮新执行，不宣称带宽或加速。
 下一练习为P2-02共享内存归约，当前只使用现有Day 16教程和参考程序，
 尚无个人归约实现通过的结论。
+
+## P2-02共享内存归约入口
+
+2026-11-17（Asia/Seoul），新增独立归约练习入口：
+`learning/practice_reduction.py`、`block_sum_check.cu`、参考kernel和个人框架。
+固定256线程/block，覆盖N=1/255/256/257/1003/65537、三类输入pattern、
+逐block partial、CPU FP64最终合并、输入不变和输出guard。
+
+- 参考kernel：6/6通过。
+- 参考 memcheck、racecheck、synccheck：均为清洁报告。
+- Python协议/环境测试：39 passed。
+- 个人框架初始：0/6；主模型随后补齐R1–R5，但候选重跑遇到
+  `cudaMalloc` out-of-memory，尚未作个人sanitizer通过结论。
+
+报告保留在 `logs/practice/`，参考串行重试报告为
+`p2-02-20261116T160234029190Z.json`；个人资源失败报告也保留。
+这次失败属于GPU运行资源状态，不调整容差、不改成CPU fallback。

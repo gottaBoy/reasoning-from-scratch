@@ -2,6 +2,10 @@
 
 前置：[Day 15索引](DAY15_CUDA_INDEXING.md)。本程序固定每block 256线程。
 
+个人实战：[P2-02逐线程手算与R1–R5](PRACTICE_P2_02_REDUCTION.md)。
+填写 `learning/my_block_sum.cu`，宿主机用 `learning.practice_reduction` 验收；
+下文 `vector_reduce.cu` 仍是Day 15–16的合并参考程序。
+
 ## 1. 图解与数字例子
 
 8个数字求和可像折叠纸条：
